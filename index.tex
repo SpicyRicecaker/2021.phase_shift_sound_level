@@ -1,0 +1,117 @@
+% Font size, paper type
+\documentclass[12pt]{article}
+% Aesthetic margins
+\usepackage[margin=1in]{geometry}
+% Core math packages,
+% Mathtools loads amsmath, and amsmath gives basic math symbs
+% Amsfonts & amssymb are misc. symbols you might need
+\usepackage{mathtools, amsfonts, amssymb}
+% Links in a pdf
+\usepackage{hyperref}
+% Hex values for colors; custom colors
+\usepackage{xcolor}
+% Use in pictures, graphs, and figures
+\usepackage{graphicx}
+% Header package
+\usepackage{fancyhdr}
+% Underlining with line breaks
+\usepackage{ulem}
+% Adjust accordingly given warning messages
+\setlength{\headheight}{15pt}
+% So we can more easily format text with pictures
+\usepackage{float}
+% Images and drawing graphs
+\usepackage{tikz}
+% Something about bits and stuff
+\usepackage[T1]{fontenc}
+% Set the incoding to unicode instead of ascii
+\usepackage[utf8]{inputenc}
+% Set the font to arial
+% \usepackage{fontspec}
+% \usepackage{mathspec}
+% \setmainfont{Arial}
+% \setmathrm{Arial}
+% \setmathfont(Digits,Latin){Arial}
+% Defines stuff about tables
+\usepackage{tabularx}
+% Similar to `lorem*[n]` in emmet
+\usepackage{lipsum}
+% Spits columns into two, the sane way
+\usepackage{paracol}
+% Layout of two columns
+% \usepackage{multicol}
+% Removes automatic indent at the start of a paragraph
+% \usepackage{indentfirst} 
+% Modularity! Includes other .tex files, precompiled
+% Use \subfile{path_of_doc} to include other filesr
+\usepackage{subfiles}
+
+% Sets footer
+\pagestyle{fancy}
+% Removes default footer style
+\fancyhf{}
+
+\rhead{
+\thepage{}
+}
+
+% Makes links look more appealing
+\hypersetup{
+colorlinks=true,
+% linkcolor=blue,
+% filecolor=magenta,
+% urlcolor=blue,
+}
+
+\begin{document}
+\title{Noise Cancellation}
+\author{by Shengdong Li}
+\date{26 October 2021}
+\maketitle
+
+\section{Research Question}
+
+How does the difference in phase between two waves affect the sound level at a certain point between them?
+
+\section{Background}
+
+\subsection{Wave Interference}
+
+The superpositioning of two waves which are in phase with each other causes destructive or constructive interference depending on the position. Perfect constructive interference is when the two waves match up directly, thus causing the amplitude to double. Conversely, when the two waves are exactly \(\frac{1}{2}\lambda\) apart, perfect destructive interference occurs, such that the amplitude of the two waves equals zero.
+
+...
+
+\subsection{Sound Intensity}
+
+The sound intensity of a wave depends both on the energy of the wave and the area in which it travels through, and "it's related to" the "amplitude squared" of the sound wave.
+
+...
+
+\subsection{Sound Level}
+
+Humans don't react to sound intensity at a linear level. Instead, it's more of an exponential relationship. Decibels factor this in, as louder sounds need exponentially more energy in order to sound "louder" to humans.
+
+...
+
+\section{Variables and Explanations}
+
+\subsection{Prediction Graph (remove later)}
+
+\href{https://www.desmos.com/calculator/ahmohu46il}{link to desmos}
+
+\subsection{Hypothesis}
+
+The difference in displacement between two in-phase waves would have a sinusoidal relationship with the sound intensity level, due to constructive and destructive interference causing cyclic patterns of change in amplitude of the resulting sound.
+
+\subsection{Independent Variable}
+
+The independent variable in this case would be the phase-shifted distance between the two waves. Its units would be in meters. It will be set by varying the start time that noise is emitted between on speaker and the other, via a computer program. This time will be multiplied with the speed of sound constant to calculate the distance the two waves are shifted.
+
+The uncertainty in this case would be because of variation of time that it takes for the cpu to run a specific program, which would nearly be negligible and nearly impossible to calculate.
+
+\subsection{Dependent Variable}
+
+The sound level will be the dependent variable of the equation. It will be in the units of decibel. This measurement will be taken with the microphone on a used samsung galaxy sx running the recording app xxx, for ten seconds. Then samples will be taken every second and averaged. The uncertainty here will arise from the sensitivity of the microphone.
+
+
+\end{document}
