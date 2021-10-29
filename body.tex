@@ -80,14 +80,15 @@ The sound level will be the dependent variable of the equation. It will be in th
 \end{figure}
 
 \begin{enumerate}
-    \item Position two identical speakers around 5 meters apart from each other
-    \item Connect the speakers to a computer
+    \item Position two identical speakers 5 meters apart from each other, with their fronts facing exactly towards each other
+    \item Connect both speakers via cable to a computer
     \item Put a phone face up between the middle of the two speakers
-    \item Run a computer program that plays a monotone sound through one speaker, then powers on the other speaker 1 millisecond after the other speaker.
-    \item With the speakers playing, begin recording audio on the phone for 10 seconds, trimming out the empty audio at the start and the end
-    \item Take samples at every second from 0 seconds to 10 seconds, then average these 11 samples into one and record this data point
-    \item Repeat sampling 3 times
-    \item Repeat the entire thing with 1, 2, 3, 4, 5 millisecond delays
+    \item Run a computer program that plays a monotone sound through one speaker, then plays the exact same tone on the other speaker with a 1 millisecond delay
+    \item With the speakers playing, begin recording audio on the phone for 20 seconds.
+    \item Trim out audio 5 seconds before the start and 5 seconds before the end, to remove silent noise
+    \item Take samples at every second from 1 second to 10 seconds, then average the value of these 10 samples and record the result 
+    \item Repeat sampling 3 times, take the average of the three values
+    \item Repeat the entire experiment from 0 to 8 millisecond delays, incrementing the delay by 0.1 milliseconds every time.
 \end{enumerate}
 
 \subsection{Safety}
@@ -112,7 +113,6 @@ Another source of error is the \textbf{sensitivity} of the speaker. All speakers
 
 \section{Works Cited}
 
-% \printbibliography
 \bibliography{citations.bib}
 
 \end{document}
