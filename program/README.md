@@ -1,0 +1,1 @@
+Sadly can't get rodio to generate a single channel sound, so we're creating a `.wav` file with a sin wave of 440 hz (A) frequency using `hound` and then editing it in Audacity to contain only the left, and right channels
