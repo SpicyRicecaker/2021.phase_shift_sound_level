@@ -129,23 +129,34 @@ pub fn wasa() {
         // So data is essentially 1056 frames x 8 blocks each for double channels, and 1056 frames x 4 blocks each for single channels
         let mut data = vec![0u8; buffer_frame_count as usize * n_block_align as usize];
         // Now we iterate over the 1056 frames in terms of their 8 blocks or 4 blocks depending on channel count
-        for frame in data.chunks_exact_mut(n_block_align as usize) {
-            // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
-            // Sample is just the amplitude we get from sin wav
-            let sample = gen.next().unwrap();
-            let sample_bytes = sample.to_le_bytes();
-            // Now, two channels would be [4], [4], one for left and one for right
-            // One channel would be [4], one for the single channel together
-            // We iterate over them [[4], [4]] or [[4]]
-            // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
-            for value in frame.chunks_exact_mut(n_block_align as usize / channels as usize) {
+        data.chunks_exact_mut(n_block_align as usize)
+            .for_each(|frame| {
+                // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
+                // Sample is just the amplitude we get from sin wav
+                let sample = gen.next().unwrap();
+                let sample_bytes = sample.to_le_bytes();
+                // Now, two channels would be [4], [4], one for left and one for right
+                // One channel would be [4], one for the single channel together
+                // We iterate over them [[4], [4]] or [[4]]
+                // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
+                let value = frame
+                    .chunks_exact_mut(n_block_align as usize / channels as usize)
+                    .next()
+                    .unwrap();
+
                 // For each group of four, we append our sample bytes into it
                 // But this is weird, because how would we control different volumes for left and right channels?
                 for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
                     *bufbyte = *sinebyte;
                 }
-            }
-        }
+                // frame.chunks_exact_mut(n_block_align as usize / channels as usize).for_each(|value| {
+                //     // For each group of four, we append our sample bytes into it
+                //     // But this is weird, because how would we control different volumes for left and right channels?
+                //     for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
+                //         *bufbyte = *sinebyte;
+                //     }
+                // });
+            });
 
         trace!("write");
         render_client
