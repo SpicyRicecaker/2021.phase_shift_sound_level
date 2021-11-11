@@ -1,35 +1,5 @@
-use program::gen_sound;
-use rodio::{source::SineWave, Decoder, OutputStream, PlayError, Sink, Source, SpatialSink};
-use std::{
-    fs::File,
-    io::BufReader,
-    thread,
-    time::{self, Duration, Instant},
-};
-
+use program::wasa::wasa;
 /// Checkout https://docs.rs/rodio/0.14.0/rodio/
-fn sound() {
-
-    // let instant = Instant::now();
-    // // let period = 2272727;
-    // // let half_period = 1136363;
-    // // let wait_duration = Duration::from_nanos(1136363);
-    // let wait_duration = Duration::from_nanos(0);
-
-    // sink_left.append(source_right);
-    // loop {
-    //     if instant.elapsed() > wait_duration {
-    //         break;
-    //     }
-    // }
-
-    // sink_right.append(source_left);
-
-    // sink_left.sleep_until_end();
-}
-
-// #![allow(clippy::cognitive_complexity)]
-
 use std::io::{self, Write};
 
 pub use crossterm::{
@@ -66,19 +36,6 @@ where
     execute!(w, terminal::EnterAlternateScreen)?;
 
     terminal::enable_raw_mode()?;
-
-    // Grab sound device
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-
-    // Generate left and right sinks
-    let sink_left = Sink::try_new(&stream_handle).unwrap();
-    let sink_right = Sink::try_new(&stream_handle).unwrap();
-
-    let file = BufReader::new(File::open("res/sine_right.wav").unwrap());
-    // Decode that sound file into a source
-    let source_right = Decoder::new(file).unwrap().repeat_infinite();
-    let file = BufReader::new(File::open("res/sine_left.wav").unwrap());
-    let source_left = Decoder::new(file).unwrap().repeat_infinite();
 
     // Load sources
     // For some reason, rodio plays left channel as right channel. Don't know why
@@ -141,17 +98,6 @@ where
 
         match read_char()? {
             'r' => {
-                // let source_right = Decoder::new(file).unwrap();
-                let file = BufReader::new(File::open("res/sine_right.wav").unwrap());
-                let source_right = Decoder::new(file).unwrap();
-                sink_left.append(source_right);
-                
-                // sink_left.append(source_right.clone());
-                // sink_right.append(source_left.clone());
-                // queue.push(format!("{:#?}", sink_left.is_paused()));
-                // queue.push(format!("{:#?}", sink_right.is_paused()));
-                // sink_left.play();
-                // sink_right.play();
                 state = State::Playing;
             }
             'p' => {
@@ -196,6 +142,8 @@ pub fn buffer_size() -> Result<(u16, u16)> {
 }
 
 fn main() -> Result<()> {
-    let mut stdout = io::stdout();
-    run(&mut stdout)
+    wasa();
+    // let mut stdout = io::stdout();
+    // run(&mut stdout)
+    Ok(())
 }

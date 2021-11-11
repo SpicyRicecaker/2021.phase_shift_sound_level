@@ -1,10 +1,9 @@
 use std::f64::consts::PI;
 use wasapi::*;
 
-#[macro_use]
-extern crate log;
 use simplelog::*;
 
+// This is a simple structure
 struct SineGenerator {
     time: f64,
     freq: f64,
@@ -15,25 +14,33 @@ struct SineGenerator {
 impl SineGenerator {
     fn new(freq: f64, fs: f64, amplitude: f64) -> Self {
         SineGenerator {
+            // initiate time at 0
             time: 0.0,
+            // frequency (e.g. 440hz)
             freq,
+            // This is the sample rate
             delta_t: 1.0 / fs,
+            // Amplitude is probably pretty important
             amplitude,
         }
     }
 }
 
+// Seems like wasapi takes in an iterator
 impl Iterator for SineGenerator {
     type Item = f32;
     fn next(&mut self) -> Option<f32> {
+        // Add dt (sample rate) to time
         self.time += self.delta_t;
+        // Output the percieved frequency
         let output = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
         Some(output)
     }
 }
 
 // Main loop
-fn main() {
+pub fn wasa() {
+    // Initiate logger
     let _ = SimpleLogger::init(
         LevelFilter::Debug,
         ConfigBuilder::new()
@@ -41,14 +48,20 @@ fn main() {
             .build(),
     );
 
+    // No idea what this does
     initialize_mta().unwrap();
 
+    // Source data
     let mut gen = SineGenerator::new(1000.0, 44100.0, 0.1);
 
+    // two channels
     let channels = 2;
+    // getting the default win device
     let device = get_default_device(&Direction::Render).unwrap();
+    // No idea what this does
     let mut audio_client = device.get_iaudioclient().unwrap();
-    let desired_format = WaveFormat::new(32, 32, &SampleType::Float, 44100, channels);
+    // Sets format of wave
+    let desired_format = WaveFormat::new(32, 32, &SampleType::Float, 48000, channels);
 
     // Check if the desired format is supported.
     // Since we have convert = true in the initialize_client call later,
@@ -72,9 +85,14 @@ fn main() {
     }
 
     // Blockalign is the number of bytes per frame
-    let blockalign = desired_format.get_blockalign();
+    // nBlock align is 8 for two channels
+    // nBlock align is 4 for 1 channel
+    // So probably, if we want only right hand playback, all we have to do is shift the data into the right 4 frames only?
+    let n_block_align = desired_format.get_blockalign();
     debug!("Desired playback format: {:?}", desired_format);
 
+    // Period is distance from crest to crest?
+    // Why define it though
     let (def_time, min_time) = audio_client.get_periods().unwrap();
     debug!("default period {}, min period {}", def_time, min_time);
 
@@ -83,25 +101,46 @@ fn main() {
             &desired_format,
             def_time as i64,
             &Direction::Render,
+            // Exclusive sharemode is important, we want as low latency as possible (must be < 1 ms)
             &ShareMode::Shared,
+            // Not sure if convert is good on latency, will check with disabled later
             true,
         )
         .unwrap();
     debug!("initialized playback");
 
+    // No idea what this does
     let h_event = audio_client.set_get_eventhandle().unwrap();
 
+    // No idea what this does
     let render_client = audio_client.get_audiorenderclient().unwrap();
 
+    // Start playback
     audio_client.start_stream().unwrap();
     loop {
+        // I don't see where we can specify channels in here
         let buffer_frame_count = audio_client.get_available_space_in_frames().unwrap();
+        // if first {
+        //     // Is 1056 for both 2 and 1 channel
+        //     debug!("{}", buffer_frame_count);
+        //     first = false;
+        // }
 
-        let mut data = vec![0u8; buffer_frame_count as usize * blockalign as usize];
-        for frame in data.chunks_exact_mut(blockalign as usize) {
+        // So data is essentially 1056 frames x 8 blocks each for double channels, and 1056 frames x 4 blocks each for single channels
+        let mut data = vec![0u8; buffer_frame_count as usize * n_block_align as usize];
+        // Now we iterate over the 1056 frames in terms of their 8 blocks or 4 blocks depending on channel count
+        for frame in data.chunks_exact_mut(n_block_align as usize) {
+            // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
+            // Sample is just the amplitude we get from sin wav
             let sample = gen.next().unwrap();
             let sample_bytes = sample.to_le_bytes();
-            for value in frame.chunks_exact_mut(blockalign as usize / channels as usize) {
+            // Now, two channels would be [4], [4], one for left and one for right
+            // One channel would be [4], one for the single channel together
+            // We iterate over them [[4], [4]] or [[4]]
+            // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
+            for value in frame.chunks_exact_mut(n_block_align as usize / channels as usize) {
+                // For each group of four, we append our sample bytes into it
+                // But this is weird, because how would we control different volumes for left and right channels?
                 for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
                     *bufbyte = *sinebyte;
                 }
@@ -110,7 +149,7 @@ fn main() {
 
         trace!("write");
         render_client
-            .write_to_device(buffer_frame_count as usize, blockalign as usize, &data)
+            .write_to_device(buffer_frame_count as usize, n_block_align as usize, &data)
             .unwrap();
         trace!("write ok");
         if h_event.wait_for_event(1000).is_err() {
