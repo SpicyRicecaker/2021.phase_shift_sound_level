@@ -48,12 +48,79 @@ pub fn wasa() {
             .build(),
     );
 
-    // No idea what this does
-    initialize_mta().unwrap();
-
     // Source data
     let mut gen = SineGenerator::new(1000.0, 44100.0, 0.1);
 
+    let playback = init_playback();
+
+    start_playback(playback, &mut gen)
+}
+
+struct PlayBack {
+    // Required by the sound api
+    audio_client: AudioClient,
+    render_client: AudioRenderClient,
+    h_event: Handle,
+    // These two variables lean more towards config
+    n_block_align: u32,
+    channels: usize,
+}
+
+fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
+    // Start playback
+    p.audio_client.start_stream().unwrap();
+    loop {
+        // I don't see where we can specify channels in here
+        let buffer_frame_count = p.audio_client.get_available_space_in_frames().unwrap();
+
+        // So data is essentially 1056 frames x 8 blocks each for double channels, and 1056 frames x 4 blocks each for single channels
+        let mut data = vec![0u8; buffer_frame_count as usize * p.n_block_align as usize];
+        // Now we iterate over the 1056 frames in terms of their 8 blocks or 4 blocks depending on channel count
+        data.chunks_exact_mut(p.n_block_align as usize)
+            .for_each(|frame| {
+                // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
+                // Sample is just the amplitude we get from sin wav
+                let sample = gen.next().unwrap();
+                let sample_bytes = sample.to_le_bytes();
+                // Now, two channels would be [4], [4], one for left and one for right
+                // One channel would be [4], one for the single channel together
+                // We iterate over them [[4], [4]] or [[4]]
+                // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
+                let value = frame
+                    .chunks_exact_mut(p.n_block_align as usize / p.channels as usize)
+                    .next()
+                    .unwrap();
+
+                // For each group of four, we append our sample bytes into it
+                // But this is weird, because how would we control different volumes for left and right channels?
+                for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
+                    *bufbyte = *sinebyte;
+                }
+                // frame.chunks_exact_mut(n_block_align as usize / channels as usize).for_each(|value| {
+                //     // For each group of four, we append our sample bytes into it
+                //     // But this is weird, because how would we control different volumes for left and right channels?
+                //     for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
+                //         *bufbyte = *sinebyte;
+                //     }
+                // });
+            });
+
+        trace!("write");
+        p.render_client
+            .write_to_device(buffer_frame_count as usize, p.n_block_align as usize, &data)
+            .unwrap();
+        trace!("write ok");
+        if p.h_event.wait_for_event(1000).is_err() {
+            error!("error, stopping playback");
+            p.audio_client.stop_stream().unwrap();
+            break;
+        }
+    }
+}
+
+fn init_playback() -> PlayBack {
+    // No idea what this does
+    initialize_mta().unwrap();
     // two channels
     let channels = 2;
     // getting the default win device
@@ -114,59 +181,11 @@ pub fn wasa() {
 
     // No idea what this does
     let render_client = audio_client.get_audiorenderclient().unwrap();
-
-    // Start playback
-    audio_client.start_stream().unwrap();
-    loop {
-        // I don't see where we can specify channels in here
-        let buffer_frame_count = audio_client.get_available_space_in_frames().unwrap();
-        // if first {
-        //     // Is 1056 for both 2 and 1 channel
-        //     debug!("{}", buffer_frame_count);
-        //     first = false;
-        // }
-
-        // So data is essentially 1056 frames x 8 blocks each for double channels, and 1056 frames x 4 blocks each for single channels
-        let mut data = vec![0u8; buffer_frame_count as usize * n_block_align as usize];
-        // Now we iterate over the 1056 frames in terms of their 8 blocks or 4 blocks depending on channel count
-        data.chunks_exact_mut(n_block_align as usize)
-            .for_each(|frame| {
-                // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
-                // Sample is just the amplitude we get from sin wav
-                let sample = gen.next().unwrap();
-                let sample_bytes = sample.to_le_bytes();
-                // Now, two channels would be [4], [4], one for left and one for right
-                // One channel would be [4], one for the single channel together
-                // We iterate over them [[4], [4]] or [[4]]
-                // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
-                let value = frame
-                    .chunks_exact_mut(n_block_align as usize / channels as usize)
-                    .next()
-                    .unwrap();
-
-                // For each group of four, we append our sample bytes into it
-                // But this is weird, because how would we control different volumes for left and right channels?
-                for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
-                    *bufbyte = *sinebyte;
-                }
-                // frame.chunks_exact_mut(n_block_align as usize / channels as usize).for_each(|value| {
-                //     // For each group of four, we append our sample bytes into it
-                //     // But this is weird, because how would we control different volumes for left and right channels?
-                //     for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
-                //         *bufbyte = *sinebyte;
-                //     }
-                // });
-            });
-
-        trace!("write");
-        render_client
-            .write_to_device(buffer_frame_count as usize, n_block_align as usize, &data)
-            .unwrap();
-        trace!("write ok");
-        if h_event.wait_for_event(1000).is_err() {
-            error!("error, stopping playback");
-            audio_client.stop_stream().unwrap();
-            break;
-        }
+    PlayBack {
+        audio_client,
+        render_client,
+        h_event,
+        n_block_align,
+        channels,
     }
 }

@@ -1,6 +1,6 @@
 use program::wasa::wasa;
 /// Checkout https://docs.rs/rodio/0.14.0/rodio/
-use std::io::{self, Write};
+use std::io::Write;
 
 pub use crossterm::{
     cursor,
