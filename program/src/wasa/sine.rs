@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, f64::consts::PI};
 
 // This is a simple structure
+#[derive(Debug, Clone, Copy)]
 pub struct SineGenerator {
     time: f64,
     freq: f64,
@@ -36,6 +37,7 @@ impl Iterator for SineGenerator {
 }
 
 /// SineGenerator wrapper with phase shifts
+#[derive(Debug, Clone)]
 pub struct SineGeneratorCached {
     // Stores all the values (1 / fs) * x depending on phase shift amount
     stack: VecDeque<f32>,
