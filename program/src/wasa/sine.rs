@@ -40,7 +40,8 @@ impl Iterator for SineGeneratorDoubled {
         // Recall that y = sin(b(x+c))
         // Period is 2pi / b, so if we have 5 hz * 2pi, then period = 2pi / 10 pi = 1 / 5
         // This means if we want a phase shift of 1/2, we need to do 1/2 / 5, which would be 1/10
-        // TODO Not sure if we could / should simplify this expression, or the performance benefits it would give
+        // T Not sure if we could / should simplify this expression, or the performance benefits it would give
+        // RESOLVE: The rust compiler actually optimizes all the constants lol, to the point that storing a number would be more overhead.
         let lagging = ((self.freq * (self.time + (self.phase_shift) / self.freq) * PI * 2.).sin()
             * self.amplitude) as f32;
         Some((leading, lagging))
