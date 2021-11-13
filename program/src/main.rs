@@ -7,7 +7,7 @@ use program::wasa::{
 use std::{
     io::Write,
     sync::{atomic::AtomicBool, Arc},
-    thread::{self, JoinHandle},
+    thread,
 };
 
 pub use crossterm::{
@@ -59,10 +59,6 @@ where
     // Source data
     let sine_generator: SineGenerator = SineGenerator::new(440.0, 48000.0, 0.1);
     // const gen: SineGeneratorCached = SineGeneratorCached::new(phase_shift, sine_generator);
-    let mut join_handle: Option<JoinHandle<()>> = None;
-
-    // Create a sender reciever to control audio thread execution
-    // let (tx, rx) = mpsc::channel();
 
     // Today I realized crossterm doesn't magically solve thread problems for you
     // The only way to have continous user input along with continuous audio output
@@ -110,7 +106,7 @@ where
                     // Clone ourselves a sine generator
                     // ...And make a clone the sine cached generator
                     // spawn new thread
-                    join_handle = Some(thread::spawn(move || {
+                    thread::spawn(move || {
                         let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
 
                         // Code specific for audio api
@@ -122,7 +118,7 @@ where
                         while running.load(Ordering::Relaxed) {
                             playback_buffer(&playback, &mut gen);
                         }
-                    }));
+                    });
                 }
             }
             'p' => {
