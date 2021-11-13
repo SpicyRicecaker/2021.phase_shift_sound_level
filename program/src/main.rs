@@ -1,3 +1,4 @@
+use crossterm::event::KeyModifiers;
 use program::wasa::{playback_buffer, sine::SineGeneratorDoubled, wasa};
 use std::sync::mpsc::{self, Sender};
 /// Checkout https://docs.rs/rodio/0.14.0/rodio/
@@ -111,33 +112,53 @@ where
             .unwrap();
 
         w.flush()?;
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+        if let Event::Key(KeyEvent { code, modifiers }) = event::read()? {
             match code {
                 // TODO should probably move it into a struct so we don't have to destructure
                 // We're storing and mutating a f32 two times, one in the audio thread and one in main thread.
                 KeyCode::Left => {
+                    let diff = if modifiers == KeyModifiers::SHIFT {
+                        -0.01
+                    } else {
+                        -0.05
+                    };
                     if let Some((_, s)) = &threadc {
-                        s.send(Action::DeltaPhaseShift(-0.05)).unwrap();
+                        s.send(Action::DeltaPhaseShift(diff)).unwrap();
                     }
-                    sine_generator.phase_shift -= 0.05;
+                    sine_generator.phase_shift += diff;
                 }
                 KeyCode::Right => {
+                    let diff = if modifiers == KeyModifiers::SHIFT {
+                        0.01
+                    } else {
+                        0.05
+                    };
                     if let Some((_, s)) = &threadc {
-                        s.send(Action::DeltaPhaseShift(0.05)).unwrap();
+                        s.send(Action::DeltaPhaseShift(diff)).unwrap();
                     }
-                    sine_generator.phase_shift += 0.05;
+                    sine_generator.phase_shift += diff;
                 }
                 KeyCode::Up => {
+                    let diff = if modifiers == KeyModifiers::SHIFT {
+                        1.
+                    } else {
+                        10.
+                    };
                     if let Some((_, s)) = &threadc {
-                        s.send(Action::DeltaFreq(10.0)).unwrap();
+                        s.send(Action::DeltaFreq(diff)).unwrap();
                     }
-                    sine_generator.freq += 10.0;
+                    sine_generator.freq += diff;
                 }
                 KeyCode::Down => {
+                    let diff = if modifiers == KeyModifiers::SHIFT {
+                        -1.
+                    } else {
+                        -10.
+                    };
                     if let Some((_, s)) = &threadc {
-                        s.send(Action::DeltaFreq(-10.0)).unwrap();
+                        s.send(Action::DeltaFreq(diff)).unwrap();
                     }
-                    sine_generator.freq -= 10.0;
+                    sine_generator.freq += diff;
                 }
                 KeyCode::Char(c) => match c {
                     ' ' => {
