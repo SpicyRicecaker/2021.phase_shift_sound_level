@@ -101,9 +101,6 @@ where
                 state = State::Playing;
             }
             'p' => {
-                // clear sinks
-                // sink_left.stop();
-                // sink_right.stop();
                 state = State::Paused;
             }
             'k' => println!("bye"),
@@ -142,8 +139,7 @@ pub fn buffer_size() -> Result<(u16, u16)> {
 }
 
 fn main() -> Result<()> {
-    wasa();
-    // let mut stdout = io::stdout();
-    // run(&mut stdout)
+    let mut stdout = std::io::stdout();
+    run(&mut stdout).unwrap();
     Ok(())
 }

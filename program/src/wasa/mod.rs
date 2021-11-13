@@ -1,45 +1,13 @@
-use std::f64::consts::PI;
 use wasapi::*;
+mod sine;
 
 use simplelog::*;
 
-// This is a simple structure
-struct SineGenerator {
-    time: f64,
-    freq: f64,
-    delta_t: f64,
-    amplitude: f64,
-}
+use self::sine::{SineGenerator, SineGeneratorCached};
 
-impl SineGenerator {
-    fn new(freq: f64, fs: f64, amplitude: f64) -> Self {
-        SineGenerator {
-            // initiate time at 0
-            time: 0.0,
-            // frequency (e.g. 440hz)
-            freq,
-            // This is the sample rate
-            delta_t: 1.0 / fs,
-            // Amplitude is probably pretty important
-            amplitude,
-        }
-    }
-}
-
-// Seems like wasapi takes in an iterator
-impl Iterator for SineGenerator {
-    type Item = f32;
-    fn next(&mut self) -> Option<f32> {
-        // Add dt (sample rate) to time
-        self.time += self.delta_t;
-        // Output the percieved frequency
-        let output = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
-        Some(output)
-    }
-}
 
 // Main loop
-pub fn wasa() {
+pub fn wasa(phase_shift: f64) {
     // Initiate logger
     let _ = SimpleLogger::init(
         LevelFilter::Debug,
@@ -49,11 +17,13 @@ pub fn wasa() {
     );
 
     // Source data
-    let mut gen = SineGenerator::new(1000.0, 44100.0, 0.1);
+    // Phase shift
+    let sine_generator = SineGenerator::new(440.0, 48000.0, 0.1);
+    let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
 
     let playback = init_playback();
 
-    start_playback(playback, &mut gen)
+    start_playback(&playback, &mut gen)
 }
 
 struct PlayBack {
@@ -66,7 +36,7 @@ struct PlayBack {
     channels: usize,
 }
 
-fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
+fn start_playback(p: &PlayBack, gen: &mut SineGeneratorCached) {
     // Start playback
     p.audio_client.start_stream().unwrap();
     loop {
@@ -80,8 +50,10 @@ fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
             .for_each(|frame| {
                 // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
                 // Sample is just the amplitude we get from sin wav
-                let sample = gen.next().unwrap();
-                let sample_bytes = sample.to_le_bytes();
+                let (leading, lagging) = gen.next().unwrap();
+                // dbg!(leading, lagging);
+                let leading_bytes = leading.to_le_bytes();
+                let lagging_bytes = lagging.to_le_bytes();
                 // Now, two channels would be [4], [4], one for left and one for right
                 // One channel would be [4], one for the single channel together
                 // We iterate over them [[4], [4]] or [[4]]
@@ -95,7 +67,7 @@ fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
                     .next()
                     .unwrap()
                     .iter_mut()
-                    .zip(sample_bytes.iter())
+                    .zip(leading_bytes.iter())
                     .for_each(|(bufbyte, sinebyte)| {
                         *bufbyte = *sinebyte;
                     });
@@ -104,7 +76,7 @@ fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
                     .next()
                     .unwrap()
                     .iter_mut()
-                    .zip(sample_bytes.iter())
+                    .zip(lagging_bytes.iter())
                     .for_each(|(bufbyte, sinebyte)| {
                         *bufbyte = *sinebyte;
                         // For each group of four, we append our sample bytes into it
