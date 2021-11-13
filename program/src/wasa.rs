@@ -86,23 +86,30 @@ fn start_playback(p: PlayBack, gen: &mut SineGenerator) {
                 // One channel would be [4], one for the single channel together
                 // We iterate over them [[4], [4]] or [[4]]
                 // We calculate the default value by always taking n_block_align / channels, which is 8 / 2 for double channels and 4 / 1 for single channels, so it's always 4 basically
-                let value = frame
-                    .chunks_exact_mut(p.n_block_align as usize / p.channels as usize)
-                    .next()
-                    .unwrap();
+                let mut value_iter =
+                    frame.chunks_exact_mut(p.n_block_align as usize / p.channels as usize);
 
                 // For each group of four, we append our sample bytes into it
                 // But this is weird, because how would we control different volumes for left and right channels?
-                for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
-                    *bufbyte = *sinebyte;
-                }
-                // frame.chunks_exact_mut(n_block_align as usize / channels as usize).for_each(|value| {
-                //     // For each group of four, we append our sample bytes into it
-                //     // But this is weird, because how would we control different volumes for left and right channels?
-                //     for (bufbyte, sinebyte) in value.iter_mut().zip(sample_bytes.iter()) {
-                //         *bufbyte = *sinebyte;
-                //     }
-                // });
+                value_iter
+                    .next()
+                    .unwrap()
+                    .iter_mut()
+                    .zip(sample_bytes.iter())
+                    .for_each(|(bufbyte, sinebyte)| {
+                        *bufbyte = *sinebyte;
+                    });
+
+                value_iter
+                    .next()
+                    .unwrap()
+                    .iter_mut()
+                    .zip(sample_bytes.iter())
+                    .for_each(|(bufbyte, sinebyte)| {
+                        *bufbyte = *sinebyte;
+                        // For each group of four, we append our sample bytes into it
+                        // But this is weird, because how would we control different volumes for left and right channels?
+                    });
             });
 
         trace!("write");
