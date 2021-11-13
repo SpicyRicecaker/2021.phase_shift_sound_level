@@ -1,17 +1,18 @@
-use std::{collections::VecDeque, f64::consts::PI};
+use std::f64::consts::PI;
 
 // This is a simple structure
 #[derive(Debug, Clone, Copy)]
-pub struct SineGenerator {
+pub struct SineGeneratorDoubled {
     time: f64,
     pub freq: f64,
     delta_t: f64,
     amplitude: f64,
+    pub phase_shift: f64,
 }
 
-impl SineGenerator {
+impl SineGeneratorDoubled {
     pub fn new(freq: f64, fs: f64, amplitude: f64) -> Self {
-        SineGenerator {
+        SineGeneratorDoubled {
             // initiate time at 0
             time: 0.0,
             // frequency (e.g. 440hz)
@@ -20,6 +21,8 @@ impl SineGenerator {
             delta_t: 1.0 / fs,
             // Amplitude is probably pretty important
             amplitude,
+            // Default phase 0
+            phase_shift: 0.0,
         }
     }
     pub fn distance(&self) -> f64 {
@@ -28,56 +31,18 @@ impl SineGenerator {
 }
 
 // Seems like wasapi takes in an iterator
-impl Iterator for SineGenerator {
-    type Item = f32;
-    fn next(&mut self) -> Option<f32> {
+impl Iterator for SineGeneratorDoubled {
+    type Item = (f32, f32);
+    fn next(&mut self) -> Option<(f32, f32)> {
         // Add dt (sample rate) to time
         self.time += self.delta_t;
-        // Output the percieved frequency
-        let output = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
-        Some(output)
-    }
-}
-
-/// SineGenerator wrapper with phase shifts
-#[derive(Debug, Clone)]
-pub struct SineGeneratorCached {
-    // Stores all the values (1 / fs) * x depending on phase shift amount
-    stack: VecDeque<f32>,
-    sine_generator: SineGenerator,
-}
-
-impl SineGeneratorCached {
-    pub fn new(phase_shift: f64, mut sine_generator: SineGenerator) -> Self {
-        let mut stack = VecDeque::new();
-
-        // Difference in time
-        let difference_time = phase_shift * (1. / sine_generator.freq);
-        // Keep adding delta_ts until we reach past the phase shift
-        loop {
-            if sine_generator.time >= difference_time {
-                // dbg!(sine_generator.time, phase_shift);
-                // dbg!(&stack);
-                break;
-            }
-            stack.push_back(sine_generator.next().unwrap());
-        }
-
-        SineGeneratorCached {
-            stack,
-            sine_generator,
-        }
-    }
-}
-
-impl Iterator for SineGeneratorCached {
-    type Item = (f32, f32);
-    /// Returns the output for the front wave, then the lagging wave, respectively
-    fn next(&mut self) -> Option<(f32, f32)> {
-        let leading = self.sine_generator.next().unwrap();
-        self.stack.push_back(leading);
-        let lagging = self.stack.pop_front().unwrap();
-        // dbg!(leading, lagging);
+        let leading = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
+        // Recall that y = sin(b(x+c))
+        // Period is 2pi / b, so if we have 5 hz * 2pi, then period = 2pi / 10 pi = 1 / 5
+        // This means if we want a phase shift of 1/2, we need to do 1/2 / 5, which would be 1/10
+        // TODO Not sure if we could / should simplify this expression, or the performance benefits it would give
+        let lagging = ((self.freq * (self.time + (self.phase_shift) / self.freq) * PI * 2.).sin()
+            * self.amplitude) as f32;
         Some((leading, lagging))
     }
 }

@@ -1,12 +1,8 @@
-use program::wasa::{
-    playback_buffer,
-    sine::{SineGenerator, SineGeneratorCached},
-    wasa,
-};
+use program::wasa::{playback_buffer, sine::SineGeneratorDoubled, wasa};
+use std::sync::mpsc::{self, Sender};
 /// Checkout https://docs.rs/rodio/0.14.0/rodio/
 use std::{
     io::Write,
-    sync::{atomic::AtomicBool, Arc},
     thread::{self, JoinHandle},
 };
 
@@ -17,55 +13,45 @@ pub use crossterm::{
     terminal::{self, ClearType},
     Command, Result,
 };
-use std::sync::atomic::Ordering;
-// #[macro_use]
-// mod macros;
-// mod test;
 
-struct Config {
-    // Frequency, in Hz
-    // Shouldn't change
-    frequency: u32,
-    // Fractional amount that describes the wavelength we're changing
-    increment: f32,
-    current_increment: f32,
+#[derive(Debug)]
+enum Action {
+    DeltaFreq(f64),
+    DeltaPhaseShift(f64),
+    Stop,
 }
 
-// #[derive(Debug)]
-// enum State {
-//     Playing,
-//     Paused,
-// }
-fn start_playback(
-    running: &Arc<AtomicBool>,
-    join_handle: &mut Option<JoinHandle<()>>,
-    phase_shift: f64,
-    sine_generator: SineGenerator,
-) {
-    // set ourselves to running
-    running.store(true, Ordering::Relaxed);
-    let running = Arc::clone(running);
+fn start_playback(mut gen: SineGeneratorDoubled) -> (JoinHandle<()>, Sender<Action>) {
+    let (tx, rx) = mpsc::channel();
     // Clone ourselves a sine generator
     // ...And make a clone the sine cached generator
     // spawn new thread
-    *join_handle = Some(thread::spawn(move || {
-        let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
-
+    let join_handle = thread::spawn(move || {
         // Code specific for audio api
         // Wasapi init
         let playback = wasa();
         // Enable playback stream
         playback.audio_client.start_stream().unwrap();
 
-        while running.load(Ordering::Relaxed) {
+        loop {
             playback_buffer(&playback, &mut gen);
+            if let Ok(v) = rx.try_recv() {
+                match v {
+                    Action::DeltaFreq(d) => gen.freq += d,
+                    Action::DeltaPhaseShift(d) => gen.phase_shift += d,
+                    Action::Stop => break,
+                }
+            }
         }
-    }));
+    });
+    (join_handle, tx)
 }
 
-fn stop_playback(running: &Arc<AtomicBool>, join_handle: &mut Option<JoinHandle<()>>) {
-    running.store(false, Ordering::Relaxed);
-    join_handle.take().map(JoinHandle::join);
+fn stop_playback(threadc: &mut Option<(JoinHandle<()>, Sender<Action>)>) {
+    if let Some((j, s)) = threadc.take() {
+        s.send(Action::Stop).unwrap();
+        j.join().unwrap();
+    }
 }
 
 fn run<W>(w: &mut W) -> Result<()>
@@ -76,8 +62,6 @@ where
 
     terminal::enable_raw_mode()?;
 
-    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
-
     // let mut config = Config {
     //     frequency: 440,
     //     increment: 1.0 / 20.0,
@@ -85,12 +69,10 @@ where
     // };
 
     // Data for playback
-    // Phase shift
-    let mut phase_shift: f64 = 0.0;
     // Source data
-    let mut sine_generator: SineGenerator = SineGenerator::new(250.0, 48000.0, 0.1);
+    let mut sine_generator: SineGeneratorDoubled = SineGeneratorDoubled::new(250.0, 48000.0, 0.1);
     // const gen: SineGeneratorCached = SineGeneratorCached::new(phase_shift, sine_generator);
-    let mut join_handle: Option<JoinHandle<()>> = None;
+    let mut threadc: Option<(JoinHandle<()>, Sender<Action>)> = None;
 
     // Today I realized crossterm doesn't magically solve thread problems for you
     // The only way to have continous user input along with continuous audio output
@@ -106,11 +88,11 @@ where
                 'down' - decrease frequency by 10 Hz
                 'q' - quit
                 frequency: {:.2}Hz
-                phase shift: {:.2}% (negatives don't work)
+                phase shift: {:.2} / 1 (negatives don't work)
                 1λ: {:.2}m
             "#,
             sine_generator.freq,
-            phase_shift,
+            sine_generator.phase_shift,
             sine_generator.distance()
         );
 
@@ -124,41 +106,46 @@ where
         )?;
 
         // Manually writes the MENU static string to stdout
-        for line in menu.split('\n') {
-            queue!(w, style::Print(line), cursor::MoveToNextLine(1))?;
-        }
+        menu.split('\n')
+            .try_for_each(|line| queue!(w, style::Print(line), cursor::MoveToNextLine(1)))
+            .unwrap();
 
         w.flush()?;
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {
+                // TODO should probably move it into a struct so we don't have to destructure
+                // We're storing and mutating a f32 two times, one in the audio thread and one in main thread.
                 KeyCode::Left => {
-                    stop_playback(&running, &mut join_handle);
-                    phase_shift -= 0.05;
-                    start_playback(&running, &mut join_handle, phase_shift, sine_generator);
+                    if let Some((_, s)) = &threadc {
+                        s.send(Action::DeltaPhaseShift(-0.05)).unwrap();
+                    }
+                    sine_generator.phase_shift -= 0.05;
                 }
                 KeyCode::Right => {
-                    stop_playback(&running, &mut join_handle);
-                    phase_shift += 0.05;
-                    start_playback(&running, &mut join_handle, phase_shift, sine_generator);
+                    if let Some((_, s)) = &threadc {
+                        s.send(Action::DeltaPhaseShift(0.05)).unwrap();
+                    }
+                    sine_generator.phase_shift += 0.05;
                 }
                 KeyCode::Up => {
-                    stop_playback(&running, &mut join_handle);
+                    if let Some((_, s)) = &threadc {
+                        s.send(Action::DeltaFreq(10.0)).unwrap();
+                    }
                     sine_generator.freq += 10.0;
-                    start_playback(&running, &mut join_handle, phase_shift, sine_generator);
                 }
                 KeyCode::Down => {
-                    stop_playback(&running, &mut join_handle);
+                    if let Some((_, s)) = &threadc {
+                        s.send(Action::DeltaFreq(-10.0)).unwrap();
+                    }
                     sine_generator.freq -= 10.0;
-                    start_playback(&running, &mut join_handle, phase_shift, sine_generator);
                 }
                 KeyCode::Char(c) => match c {
                     ' ' => {
                         // If we're not running start
-                        if !running.load(Ordering::Relaxed) {
-                            start_playback(&running, &mut join_handle, phase_shift, sine_generator);
+                        if threadc.is_none() {
+                            threadc = Some(start_playback(sine_generator));
                         } else {
-                            // Otherwise stop playback
-                            stop_playback(&running, &mut join_handle);
+                            stop_playback(&mut threadc);
                         }
                     }
                     'q' => break,

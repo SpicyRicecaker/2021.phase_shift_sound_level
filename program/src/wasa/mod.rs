@@ -3,7 +3,7 @@ pub mod sine;
 
 use simplelog::*;
 
-use self::sine::SineGeneratorCached;
+use self::sine::SineGeneratorDoubled;
 
 // Main loop
 pub fn wasa() -> PlayBack {
@@ -28,7 +28,7 @@ pub struct PlayBack {
     channels: usize,
 }
 
-pub fn playback_buffer(p: &PlayBack, gen: &mut SineGeneratorCached) {
+pub fn playback_buffer(p: &PlayBack, gen: &mut SineGeneratorDoubled) {
     // I don't see where we can specify channels in here
     let buffer_frame_count = p.audio_client.get_available_space_in_frames().unwrap();
 
@@ -40,7 +40,6 @@ pub fn playback_buffer(p: &PlayBack, gen: &mut SineGeneratorCached) {
             // Basically, we convert a float, e.g. 1.25 into 4 bytes, and floats are not very intuitively stored as bytes so we can ignore 'em
             // Sample is just the amplitude we get from sin wav
             let (leading, lagging) = gen.next().unwrap();
-            // dbg!(leading, lagging);
             let leading_bytes = leading.to_le_bytes();
             let lagging_bytes = lagging.to_le_bytes();
             // Now, two channels would be [4], [4], one for left and one for right
