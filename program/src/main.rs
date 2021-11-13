@@ -7,7 +7,7 @@ use program::wasa::{
 use std::{
     io::Write,
     sync::{atomic::AtomicBool, Arc},
-    thread,
+    thread::{self, JoinHandle},
 };
 
 pub use crossterm::{
@@ -59,43 +59,41 @@ where
     // Source data
     let sine_generator: SineGenerator = SineGenerator::new(440.0, 48000.0, 0.1);
     // const gen: SineGeneratorCached = SineGeneratorCached::new(phase_shift, sine_generator);
+    let mut join_handle: Option<JoinHandle<()>> = None;
 
     // Today I realized crossterm doesn't magically solve thread problems for you
     // The only way to have continous user input along with continuous audio output
     // is to have them in separate threads
     // Loop for accepting user input (in raw mode)
     loop {
-        //     let menu = format!(
-        //         r#"
-        // 'r' - resume audio playback
-        // 'p' - stop audio playback
-        // 'k' - increase wavelength delay by 1/8
-        // 'j' - decrease wavelength delay by 1/8
-        // 'q' - quit
-        // current state: {:#?},
-        // current freq: {} ,
-        // increment freq: {} ,
-        // current increment: {} ,
-        // "#,
-        //         running, config.frequency, config.increment, config.current_increment
-        //     );
+        let menu = format!(
+            r#"
+                'r' - resume audio playback
+                'p' - stop audio playback
+                'k' - increase wavelength delay by 0.05
+                'j' - decrease wavelength delay by 0.05
+                'q' - quit
+                frequency: {}
+                phase shift: {}
+            "#,
+            440, phase_shift
+        );
 
-        //     // clear screen
-        //     queue!(
-        //         w,
-        //         style::ResetColor,
-        //         terminal::Clear(ClearType::All),
-        //         cursor::Hide,
-        //         cursor::MoveTo(1, 1)
-        //     )?;
+        // clear screen
+        queue!(
+            w,
+            style::ResetColor,
+            terminal::Clear(ClearType::All),
+            cursor::Hide,
+            cursor::MoveTo(1, 1)
+        )?;
 
-        //     // Manually writes the MENU static string to stdout
-        //     for line in menu.split('\n') {
-        //         queue!(w, style::Print(line), cursor::MoveToNextLine(1))?;
-        //     }
+        // Manually writes the MENU static string to stdout
+        for line in menu.split('\n') {
+            queue!(w, style::Print(line), cursor::MoveToNextLine(1))?;
+        }
 
-        //     w.flush()?;
-
+        w.flush()?;
         match read_char()? {
             'r' => {
                 // Only if we're not current running
@@ -106,7 +104,7 @@ where
                     // Clone ourselves a sine generator
                     // ...And make a clone the sine cached generator
                     // spawn new thread
-                    thread::spawn(move || {
+                    join_handle = Some(thread::spawn(move || {
                         let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
 
                         // Code specific for audio api
@@ -118,15 +116,60 @@ where
                         while running.load(Ordering::Relaxed) {
                             playback_buffer(&playback, &mut gen);
                         }
-                    });
+                    }));
                 }
             }
             'p' => {
                 running.store(false, Ordering::Relaxed);
-                // tx.send(running);
             }
-            'k' => phase_shift += 0.1,
-            'j' => phase_shift -= 0.1,
+            'k' => {
+                running.store(false, Ordering::Relaxed);
+                join_handle.take().map(JoinHandle::join);
+                phase_shift += 0.05;
+                // set ourselves to running
+                running.store(true, Ordering::Relaxed);
+                let running = Arc::clone(&running);
+                // Clone ourselves a sine generator
+                // ...And make a clone the sine cached generator
+                // spawn new thread
+                join_handle = Some(thread::spawn(move || {
+                    let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
+
+                    // Code specific for audio api
+                    // Wasapi init
+                    let playback = wasa();
+                    // Enable playback stream
+                    playback.audio_client.start_stream().unwrap();
+
+                    while running.load(Ordering::Relaxed) {
+                        playback_buffer(&playback, &mut gen);
+                    }
+                }));
+            }
+            'j' => {
+                running.store(false, Ordering::Relaxed);
+                join_handle.take().map(JoinHandle::join);
+                phase_shift -= 0.05;
+                // set ourselves to running
+                running.store(true, Ordering::Relaxed);
+                let running = Arc::clone(&running);
+                // Clone ourselves a sine generator
+                // ...And make a clone the sine cached generator
+                // spawn new thread
+                join_handle = Some(thread::spawn(move || {
+                    let mut gen = SineGeneratorCached::new(phase_shift, sine_generator);
+
+                    // Code specific for audio api
+                    // Wasapi init
+                    let playback = wasa();
+                    // Enable playback stream
+                    playback.audio_client.start_stream().unwrap();
+
+                    while running.load(Ordering::Relaxed) {
+                        playback_buffer(&playback, &mut gen);
+                    }
+                }));
+            }
             'q' => break,
             _ => {}
         };
