@@ -4,7 +4,7 @@ use std::{collections::VecDeque, f64::consts::PI};
 #[derive(Debug, Clone, Copy)]
 pub struct SineGenerator {
     time: f64,
-    freq: f64,
+    pub freq: f64,
     delta_t: f64,
     amplitude: f64,
 }
@@ -21,6 +21,9 @@ impl SineGenerator {
             // Amplitude is probably pretty important
             amplitude,
         }
+    }
+    pub fn distance(&self) -> f64 {
+        343. / self.freq
     }
 }
 
