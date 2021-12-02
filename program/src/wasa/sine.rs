@@ -14,15 +14,15 @@ impl SineGeneratorDoubled {
     pub fn new(freq: f64, fs: f64, amplitude: f64) -> Self {
         SineGeneratorDoubled {
             // initiate time at 0
-            time: 0.0,
+            time: 0.,
             // frequency (e.g. 440hz)
             freq,
             // This is the sample rate
-            delta_t: 1.0 / fs,
+            delta_t: 1. / fs,
             // Amplitude is probably pretty important
             amplitude,
             // Default phase 0
-            phase_shift: 0.0,
+            phase_shift: 0.,
         }
     }
     pub fn distance(&self) -> f64 {

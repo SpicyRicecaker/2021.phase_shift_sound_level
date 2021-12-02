@@ -71,7 +71,7 @@ where
 
     // Data for playback
     // Source data
-    let mut sine_generator: SineGeneratorDoubled = SineGeneratorDoubled::new(250.0, 48000.0, 0.1);
+    let mut sine_generator: SineGeneratorDoubled = SineGeneratorDoubled::new(264.0, 48000.0, 0.1);
     // const gen: SineGeneratorCached = SineGeneratorCached::new(phase_shift, sine_generator);
     let mut threadc: Option<(JoinHandle<()>, Sender<Action>)> = None;
 
