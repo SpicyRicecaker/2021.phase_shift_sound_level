@@ -20,7 +20,7 @@ Wave interference essentially occurs, when two waves meet together. There are tw
 
 \subsection{Sound Intensity}
 
-We know from theory that the relative phase shift between two waves is clearly tied to amplitude of the resulting wave in some way, but the amplitude doesn't necessarily equal the sound level of the wave. In fact, the energy of the wave is proportional to the square of its amplitude \cite{openstax}. This is because from the formula for simple harmonic motion, of a particle in a wave moving up and down, we derive the equation \(E=2\pi^2\cdot d\cdot A\cdot v\cdot f^2\cdot x^2\).
+We know from theory that the relative phase shift between two waves is clearly tied to amplitude of the resulting wave in some way, but the amplitude doesn't necessarily equal the sound level of the wave. In fact, the energy of the wave is proportional to the square of its amplitude \cite{openstax}. This is because from the formula for simple harmonic motion, of a particle in a wave moving up and down, we derive the equation \(E=2\pi^2\cdot d\cdot A\cdot v\cdot f^2\cdot x^2\) \cite{giancoli1995physics}.
 
 
 The sound intensity of a wave depends both on the energy of the wave and the area in which it travels through, being proportional to power and inversely proportional to area as shown by \(I=\frac{P}{A}\), where area is a square length. \cite{openstax}.
@@ -51,18 +51,30 @@ The difference in displacement between two in-phase waves would have a sinusoida
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.3]{prediction.png}
-    \caption{Predicted graph when the second wave is phase-shifted at exactly \(\frac{1}{2}\lambda\) away from each other. Red line is the resulting amplitude. \href{https://www.desmos.com/calculator/ahmohu46il}{link}}
+    \caption{Predicted graph when the second wave is phase-shifted at exactly \(\frac{1}{2}\lambda\) away from each other. Red line is the resulting amplitude.}
 \end{figure}
 
 \section{Variables and Explanations}
 
 \subsection{Independent Variable}
 
-The independent variable in this case would be the phase-shifted distance between the two waves. Its units would be in a decimal ratio of the wavelength of the sine wave (with a frequency of 250 Hz).
+The independent variable in this case would be the phase-shifted distance between the two waves. Its units would be in a decimal ratio of the wavelength of the sine wave (with a frequency of 264 Hz).
 
-To change this variable, we use a computer program to generate this wave.
+To change this variable, we use a computer program to generate this wave from speakers.
 
-\begin{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{layout.png}
+    \caption{Overview of the computer program}
+\end{figure}
+
+To produce a real sound wave from the speakers, we have to input data points into the sound interface. For most regular situations, these data points either by accessing them directly (for example, in an \textit{.mp3} file). But in this case, to get a static noise, we sample the \textbf{amplitude} a sound wave, which in this case is our \(\sin\) function.
+
+The basics of how we get our points for the two waves works: is by plugging in the simple time for one function into sin, then plugging in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently.
+
+This function below is responsible is the core of the sampling code for the program.
+
+\begin{minted}[linenos, breaklines]{rust}
     fn next(&mut self) -> Option<(f32, f32)> {
         // Add dt (sample rate) to time
         self.time += self.delta_t;
@@ -72,21 +84,13 @@ To change this variable, we use a computer program to generate this wave.
         // This means if we want a phase shift of 1/2, we need to do 1/2 / 5, which would be 1/10
         let lagging = ((self.freq * (self.time + (self.phase_shift) / self.freq) * PI * 2.).sin()
             * self.amplitude) as f32;
+        // the leading is outputted to the left speaker
+        // the lagging is outputted to the right speaker
         Some((leading, lagging))
     }
-\end{verbatim}
+\end{minted}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.2]{layout.png}
-    \caption{Overview of the computer program}
-\end{figure}
-
-In order to understand this function, first understand that whenver we wish to produce music through the speaker, that is, a real sound wave through the speaker, we have to input data points into the sound API. We get these data points either by accessing them directly (in the case of an \textit{.mp3} file, for example, or by sampling the \textbf{amplitude} a sound wave, which in this case is our `sin' function.
-
-The question then becomes, how do we determine how many points do we need to sample from the wave? We define the number of points that we'll sample using the \textbf{sample rate}.
-
-For example if the sample rate for our application is 48,000 Hz, that means that every \(\frac{1}{48,000}seconds\) or so, we'll look at our sine function and retrieve our points.
+In line 3, our current time is incremented by \verb+delta_t+. and its value is \(\frac{1}{48,000}(seconds)\), meaning we'll sample \(48,000\) points every second from our \(\sin\) wave.
 
 \begin{figure}[H]
     \centering
@@ -94,29 +98,49 @@ For example if the sample rate for our application is 48,000 Hz, that means that
     \caption{Example of how a sine wave is sampled over a period of 1s}
 \end{figure}
 
-The basics of how we get our points for the two waves works: is by plugging in the simple time for one function into sin, then plugging in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently.
+The reason that our \verb+delta_t+ is that value is because the specific speaker used in this experiment has a maximum sample rate of \(48,000Hz\). The effect that higher and lower sample rates has on sound waves produced by the speaker is beyond the scope of this paper.
 
-% As the sounds from the speakers are generated by sampling a \(\sin\) function with a frequency of 250 Hz, this independent variable will be directly set by adding an it as an offset, \(\sin(x + dt)\), where \(dt\) is the phase shift, to the second speaker on the right.
+In line 4, the amplitude of the "control wave" (the wave in which there is no phase change is calculated) using the following function
+\begin{equation*}
+    A\cdot\sin\left(ft\cdot2\pi\right)
+\end{equation*}, where \(f\) is the frequency of the wave (which is \(264\)), \(t\) is the current time, and \(A\) is the amplitude of the wave.
 
-The uncertainty in this independent variable is practically negligible, as the increments in phase shift are directly set in the computer program as floating point values, which the investigation of is beyond the scope of this paper.
+We also have \(2\pi\), because recall that the period of a \(sin\) wave is \(\frac{2\pi}{B}\), where \(B\) is the coefficient modifying the \(X\). Since frequency is \(\frac{1}{T}\), that means the frequency of a wave is \(\frac{B}{2\pi}\). So if we want our frequency of \(264\) to be true, we add the \(2\pi\)
+\begin{align*}
+    frequency & =\frac{B}{2\pi}            \\
+              & =\frac{264\cdot2\pi}{2\pi} \\
+              & =264
+\end{align*}
+
+Finally, in line 8, we calculate the phase-shifted wave by simply adding the phase shift to the time, divided by the frequency, \(f\).
+
+\begin{equation*}
+    A\cdot\sin\left(f\left(t+\frac{\lambda}{f}\right)\cdot2\pi\right)
+\end{equation*}
+
+We divide by the frequency because our phase shift is a ratio from 0 to 1, and a frequency of \(264\) means that the wave is going down 264 times a second, meaning its wavelength is not equal to 1.
+
+The uncertainty in this independent variable is practically negligible, as the increments in phase shift of \(0.05\) are directly stored in the computer program as floating point values, the inaccuracy of which is beyond the scope of this paper.
 
 \subsection{Dependent Variable}
 
-The sound level will be the dependent variable of the equation. It will be in the units of decibel. This measurement will be taken with the microphone on a used samsung galaxy sx running the recording app xxx, for ten seconds. Then samples will be taken every second and averaged.
+The sound level will be the dependent variable of the equation, measured in decibes. This measurement will be taken with the microphone on a used Samsung Galaxy Note9, placed in exactly the center of the distance between the two seakers, measured by ruler. The sound meter app will run for twenty seconds, and the average sound level during that time will be recorded.
 
-The uncertainty here will arise from the sensitivity of the microphone.
+The uncertainty here will arise from the sensitivity of the microphone, and the precision of the sound meter app, as well as ambient noise and other unexpected noise from the environment, which would heavily impact the data from the experiment if it is not controlled.
 
 \subsection{Controlled Variable}
 
-\textbf{The distance between the two speakers} must be kept constant in every trial. As sound spreads out, it loses power exponentially, so pulling the speakers too far apart will decrease the measured sound level, and pulling the speakers too close together would increase the measured sound level. The distance between the two speakers would also directly impact the independent variable, the phase shift between two waves. For example, for a \(\sin\) wave of 250 Hz (around middle C frequency), the wavelength is only \(1.3m\), so a small shift in speaker distance in the tens of centimeters could invalidate the whole experiment. Therefore, to keep 
+\textbf{The distance between the two speakers} must be kept constant in every trial. As sound spreads out, it loses power exponentially, so pulling the speakers too far apart will decrease the measured sound level, and pulling the speakers too close together would increase the measured sound level. The distance between the two speakers would also directly impact the \textit{phase shift} between the two waves. For example, for a \(\sin\) wave of 264 Hz (around middle C frequency), the wavelength is only around \(1.30m\) meters, so a small shift in speaker distance in the tens of centimeters could invalidate the whole experiment. Therefore, to keep distance between the two waves equivalent, a ruler will be used to measure exactly \(1.30m\) from the base of one speaker to the other.
 
-\textbf{The position of the microphone} should be kept constant in every trial. This is because while for perfect destructive interference the amplitude of the wave everywhere would be zero, because sound waves are sinusoidal their amplitudes differ at certain points. A distance further away from the source would also result in decreasing sound levels due to the fact that energy travels away in a sphere so much of it is lost to the environment further out.
+\textbf{The position of the microphone} should be kept constant in every trial, both in the axis between speakers, and the axis perpendicular to the axis between speakers. This is because, while for perfect destructive interference, the amplitude of the wave everywhere would be zero, in other cases their will amplitudes differ at certain points. Similar to the positions of the speakers, a perpendicular distance further away from the speakers would also result in decreasing sound levels due to the fact that energy travels away in a sphere so much of it is lost to the environment further out. To mitigate position difference in the axis between speakers, the same ruler will be used to ensure that the tip of the phone is aligned exactly to \(0.65m\).
 
-\textbf{The frequency and wavelength of the two waves} The frequency of two waves should be kept the exact same throughout all trials. In order for perfect constructive and destructive interference to occur, the two waves must be perfectly in-phase with each other, otherwise the resulting wave would be very uneven and there would be varying results everytime.
+\textbf{The frequency and wavelength of the two waves} The frequency of two waves should be kept the exact same at \(264Hz\) throughout all trials. In order for perfect constructive and destructive interference to occur, the two waves must be perfectly in-phase with each other, otherwise the resulting wave would be very uneven and there would be varying results everytime.
 
 \textbf{The temperature of the room} The temperature of the room should be kept constant because temperature and movement of particles in the air affects the amount of energy lost as the wave propogates forward.
 
-\textbf{Ambient Sound Level} The ambient sound level should be kept constant because otherwise the dependent variable of sound level would be modified not just by the independent variable but also by the environment, which would invalidate the experiment. To minimize the impact that the environment will have on the experiment, four chairs will be placed surrounding the two speakers, and plankets draped over them and the top of the speakers, in an effort to decrease the effects that ambient sound levels would have on the final experiment.
+\textbf{Ambient Sound Level} The ambient sound level should be kept constant because otherwise the dependent variable of sound level would be modified not just by the independent variable but also by the environment, which would invalidate the experiment. To minimize the impact that the environment will have on the experiment, four chairs will be placed surrounding the two speakers, and blankets draped over them and the top of the speakers, in an effort to decrease the effects that ambient sound levels would have on the final experiment.
+
+\textbf{Volume of the Speaker and Operating System} There are two places where the general output volume of the speaker can be modified, and those are in the operating system (when the press the volume up and volume down keys are pressed on the keyboard) as well as volume buttons on the external speaker. As these sound levels vary across speakers and operating systems, this paper will not provide a set constant value in which to set these two values, but the two volume controls will be tuned to an acceptable midlevel volume that falls under the danger sound levels specified by NIOSH (see safety sections below) and kept at a constant value when the experiment is carried out.
 
 \section{Method}
 
@@ -129,17 +153,18 @@ The uncertainty here will arise from the sensitivity of the microphone.
 \begin{enumerate}
     \item Position two identical speakers 1.30 meters apart from each other, with their fronts aligned straight towards each other
     \item Connect both speakers via cable to a computer
-    \item Put a phone face up between the midpoint of the distance between the two speakers
-    \item Run a computer program that plays a monotone sine wave at a frequency of 264 Hz through one speaker, then plays the exact same sound on the other speaker
+    \item Put a phone face up on the midpoint of the distance between the two speakers
+    \item Set the phase-shift of the wave to \(0\lambda\) through the computer program
+    \item Run the computer program that plays a monotone sine wave at a frequency of 264 Hz through one speaker and an identical phase-shifted wave through the other speaker at the same time.
     \item After the speakers have started playing for at least 5 seconds, begin recording audio on the phone for 20 seconds.
     \item After 20 seconds, pause the recording app on the phone, and record the average sound level displayed on the app
     \item Repeat this recording process 3 times, and take the average of the three trials
-    \item Repeat the entire experiment with shifted wavelengths of 0, incrementing by \(0.05\times\lambda\), all the way up to and including a full phase shift of \(1\lambda\)
+    \item Repeat the entire experiment, incrementing the phase-shift defined in step 4 by \(0.05\lambda\), all the way up to and including a full phase shift of \(1\lambda\)
 \end{enumerate}
 
 \subsection{Safety}
 
-Safety precautions should be made to ensure that the speaker sound levels do not go above maximal decibel sound levels that humans are tolerant of, to preserve the health of the ear. According to the NIOSH recommendations, a constant sound level of 85 dBAs should be exposed to no amount greater than 8 hours.
+Safety precautions should be made to ensure that the speaker sound levels do not go above maximal decibel sound levels that humans are tolerant of, to preserve the health of the ear. According to the NIOSH recommendations, a human should not be exposed to a constant sound level of 85 dBAs for greater than 8 hours \cite{cdc}. In order to make sure that sound levels never get close to 85 dBAs, the sound level when speakers are playing Aill be observed on the sound meter app at all times and the speaker volume kept at a constant
 
 \section{Raw Data Table}
 
@@ -187,16 +212,14 @@ Safety precautions should be made to ensure that the speaker sound levels do not
 \section{Sample Calculations}
 
 \begin{align*}
-    \intertext{\textbf{Average Sound level}}
+    \intertext{\textbf{Propogation of Uncertainty}}
     \intertext{The formula for the sound level, \(T_{average}\) is given by}
     T_{average}              & = \frac{T_{1}+T_{2}+T_{3}}{3}
-    \intertext{\textit{Example} calculation of average distance when given a phase shift of \(0.55\lambda\)}
-                             & = \frac{40.1g+39.9g+40.1g}{3} \approx 40.0g                              \\
-    \intertext{\textbf{Propogation of Uncertainty}}
+    \intertext{\textbf{Average Sound level}}
     \intertext{The first way to propogate uncertainty is as follows}
     Uncertainty\ T_{average} & = \frac{Uncertainty\ T_{1} + Uncertainty\ T_{2} + Uncertainty\ T_{3}}{3}
-    \intertext{\textit{Example} calculation of propogation of uncertainty given a phase shift of \(0.55\lambda\) \(0.55\lambda\)}
-                             & = \frac{.05 + .05 + .05}{3} = .05                                        \\
+    \intertext{\textit{Example} calculation of propogation of uncertainty given a phase shift of \(0.55\lambda\)}
+                             & = \frac{.05 + .05 + .05}{3} = .05
 \end{align*}
 
 \section{Calculated Data Table}
@@ -240,12 +263,12 @@ Safety precautions should be made to ensure that the speaker sound levels do not
 
 The line of best fit follows a curve that repetitively goes up and down, which suggests that phase shift has a sinusoidal relationship with resulting sound level. However, the correlation falls off, and points begin to deviate wildly from the line of best fit especially near the trough of the wave, where they seem to accelerate in change, and at the crests, where their rate of change seems to slow down. The error bars on many of the data points are small, yet the bars often don't touch the actual line of best fit. The crests of the grpah occur when phase shift is 0 and 1, and the lowest volume area would be when phase shift is 0.5.
 
-I recalled here that decibels were exponential, meaning that they require exponentially more energy to get loud, and exponentially less energy to become more quiet. We could calculate use our average sound level to calculate the intensity of the wave.
+Recall here that decibels are exponential, meaning that they require exponentially more energy to get loud, and exponentially less energy to become more quiet. We could calculate use our average sound level to calculate the intensity of the wave.
 
 \section{Sample Calculations for Sound Intensity}
 
 \begin{align*}
-    \intertext{This is the equation for getting sound level}
+    \intertext{Recall the equation for getting sound level}
     s                 & =10\log_{10}\left(\frac{I}{I_{0}}\right) \\
     \intertext{We divide both sides by 10}
     \frac{s}{10}      & =\log_{10}\left(\frac{I}{I_{0}}\right)   \\
@@ -285,39 +308,43 @@ Notice that we get \(10\) to the power of something as the resulting equations. 
     \end{tabularx}
 \end{table}
 
-And then we can graph this, to create a much nicer looking graph:
+And then we can graph the sound intensity as a function of phase shift, which which results in a graph with the points being much more closely aligned with the data.
 
 \begin{figure}[H]
     \centering
-    \textbf{The effect of phase shift on the sound level of resulting wave.}\medskip\par
+    \textbf{The effect of phase shift on the sound intensity of resulting wave.}\medskip\par
     \includegraphics[scale=0.3]{graph-calc.png}
     \caption{\(y=9.31\times 10^{-8}\sin\left(6.57\left(x+0.142\right)\right)+9.95\times 10^{-8}\) }
 \end{figure}
 
+The resulting sound intensity graph is much more sinusoidal in nature than the sound level graph, as all the averaged data points or their error bars fall on the line of best fit.
+
+\section{Observations}
+
+During the experiment, I noticed that the speakers radiated out their sound waves in a sphere outwards, and as an observer in the side, moving my ears to different areas resulted drastically different areas of loudness and quietness.
+
 \section{Conclusion}
 
-The results of the experiment confirmed my initial hypothesis that the phase shift  of a one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves that are in phase meet, their crests add up, such that overlaid waves became louder, and waves off by half a \(\lambda\) became less loud, were true.
-Greater energy results in greater amplitude, but it is important to keep in mind that the sound level relationship isn't purely sinusoidal, but includes logarithms, such that it becomes hard to increase volume. The sweet spot for perfect destructive interference, therefore, Should be carefully inspected, as the silence is much deeper as the wavelengths line up to be around \(\frac{1}{2}\) apart.
+The results of the experiment went against my initial hypothesis that the phase shift of a one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves that are in phase meet, their crests add up, such that overlaid waves became louder, and waves off by half a \(\lambda\) became less loud, were true. However, while this change in amplitude affected \textit{sound intensity} in a fully sinusoidal relationship, the relationship with sound level was part sinusoidal, part exponential.
+Greater energy does result in greater amplitude, but it is important to keep in mind that the sound level relationship isn't purely sinusoidal, because it includes logarithms and isn't uniform, so it becomes harder to increase sound level overtime with constant increases in energy.
+In relation to perfect perfect destructive interference, the data suggests that sound level will decrease exponentially as the phase shift gets closer and closer to \(0.5\lambda\). In building a real sound-cancellation device, this change in should therefore be carefully inspected, as the silence is much deeper as the wavelengths line up to be around \(\frac{1}{2}\) apart.
 
 \section{Evaluation of Strengths and Weaknesses}
-The use of a computer to change the independent variable, change in phase between two identical waves, offers a very high degree of accuracy, especially in dealing with waves travelling at the speed of light. This should result in a very low degree of uncertainty in the measurement of the independent variable.
+The use of a computer to directly change the change in phase between two identical waves, made it so that there was very little error in changing the independent variable.
 
-The fact that this test includes mostly electronics allows for easy automation of collected data. This results in data being collected in a smaller time frame, which minimizes the impact that the environment, in ambient noise level and temperature.
+The fact that this test used a computer program to directly sample from \(\sin\) waves depending on their phase shift made changing the independent being very simple. This resulted in data being collected in a smaller time frame, which minimized the impact that the environment, in ambient noise level and temperature.
 
-The biggest source of weakness in this experiment was the nature of speakers. I noticed that duirng the experiment, only the straight middle line between the two speakers exhibited this constant pattern. The speakers radiated out their sound waves in a sphere outwards, and as an observer in the side, moving my ears to different areas resulted drastically different areas of loudness and quietness.
+Another major source of error in this experiment was the fact that it was done inside, and the sound dampening solution of four chairs and a blanket did not work out. When speakers were turned on with the blanket enclosing them, the blankets did not actually fully cancel out the sound traveling towards them like I thought they would do, but rather, they seemed to \textbf{increase} the sound level if they were placed too close to the speakers. This was perhaps the speakers were more flat than I thought they would be. Multiple waves bouncing together at different angles could've caused some measureable different in sound intensity, although the position of the blankets were kept constant.
 
-It's hard to do the experiment outside, because there are no plugs outside. Therefore, when doing the experiment inside, \textbf{reverb} from walls may cause sound distortions that affect sound levels in unforseen ways, for example, waves may bounce off from the left and right instead of head on and collide fourway in the middle, exacerbating maximum amplitudes and increasing the deviation of data.
+Another potentially large source of the error was the angle between speakers. Initially, I thought that it wouldn't be a problem and didn't include it in my controlled variables, but after realizing that the speakers were spherical, the alignment of the speakers pointing directly to each other had to be done by eye, which was perhaps why the ideal phase shift for perfect destructive interference to occur according to literature was not exactly at \(0.5\lambda\) but rather closer to \(0.6\lambda\).
 
-To prevent this, sound dampeners may be placed on the side of the wall, for example blankets.
-
-Another source of error is the \textbf{sensitivity} of the speaker. All speakers, due to limitations in physics and design, have a degree of error in the quality of sound that they are able to produce. In this experiment, this sensitivity was added as uncertainty to the measurement of the sound level. To decrease the amount of uncertainty in future measurements, better quality speakers could be used, which would have a higher sensitivity and therefore result in less fluctuations in sound generated.
+% Another source of error was the \textbf{sensitivity} of the speaker. All speakers, due to limitations in physics and design, have a degree of error in the quality of sound that they are able to produce. In this experiment, this sensitivity was added as uncertainty to the measurement of the sound level. To decrease the amount of uncertainty in future measurements, better quality speakers could be used, which would have a higher sensitivity and therefore result in less fluctuations in sound generated.
 
 \section{Future Improvements}
 
-To improve upon this experiment, the first step would be to get a more controlled room, where there would be less bouncing on the walls. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements.
+To improve upon this experiment, the first step would be to get a more controlled room, and use better sound dampeners which would catch the sound waves instead of letting them bounce off right back towards the microphone. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements. Using a protractor to ensure that the speakers are more aligned to each other would potentially get data values where the perfect destructive interference is closer to \(0.5\lambda\).
 
-Lastly, testing more wavelengths of phase shift, such as 2 or 3 \(\lambda\)s of shift would confirm the pattern that was concluded in this experiment.
-
+Lastly, testing greater wavelengths of phase shift, up to 2 or 3 \(\lambda\)s of shift would better confirm the pattern that was concluded in this experiment.
 
 \section{Works Cited}
 
