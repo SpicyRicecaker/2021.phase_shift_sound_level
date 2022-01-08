@@ -72,7 +72,7 @@ To produce a real sound wave from the speakers, we have to input data points int
 
 The basics of how we get our points for the two waves works: is by plugging in the simple time for one function into sin, then plugging in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently.
 
-This function below is responsible is the core of the sampling code for the program.
+This function below is responsible is the core of the sampling code for the program\footnote[1]{the source code for the full program, as well as this paper, can be found at \href{https://doi.org/10.5281/zenodo.5829755}{https://doi.org/10.5281/zenodo.5829755}}.
 
 \begin{minted}[linenos, breaklines]{rust}
     fn next(&mut self) -> Option<(f32, f32)> {
