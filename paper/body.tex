@@ -78,23 +78,8 @@ To produce a real sound wave from the speakers, we have to input data points int
 
 The basics of how we get our points for the two waves works: is by plugging in the simple time for one function into sin, then plugging in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently.
 
-This function below is responsible is the core of the sampling code for the program\footnote[1]{the source code for the full program, as well as this paper, can be found at \href{https://doi.org/10.5281/zenodo.5829755}{https://doi.org/10.5281/zenodo.5829755}}.
+This function below is responsible is the core of the sampling code for the program\footnote[1]{the source code for the full program, as well as this paper, can be found at \href{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}}\footnote[2]{see appendix}.
 
-\begin{minted}[linenos, breaklines]{rust}
-    fn next(&mut self) -> Option<(f32, f32)> {
-        // Add dt (sample rate) to time
-        self.time += self.delta_t;
-        let leading = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
-        // Recall that y = sin(b(x+c))
-        // Period is 2pi / b, so if we have 5 hz * 2pi, then period = 2pi / 10 pi = 1 / 5
-        // This means if we want a phase shift of 1/2, we need to do 1/2 / 5, which would be 1/10
-        let lagging = ((self.freq * (self.time + (self.phase_shift) / self.freq) * PI * 2.).sin()
-            * self.amplitude) as f32;
-        // the leading is outputted to the left speaker
-        // the lagging is outputted to the right speaker
-        Some((leading, lagging))
-    }
-\end{minted}
 
 In line 3, our current time is incremented by \verb+delta_t+ and its value is \(\frac{1}{48,000}(seconds)\), meaning we'll sample \(48,000\) points every second from our \(\sin\) wave.
 
@@ -188,34 +173,39 @@ Safety precautions should be made to ensure that the speaker sound levels do not
 %         Armadillo & frozen      & 8.99       \\ \bottomrule
 %     \end{tabular}
 % \end{table}
+% \begin{table}[]
+%     \begin{tabular}{rrrrrr}
+%         \multicolumn{1}{l}{Phase shift (ratio out of 1 wavelength)} & \multicolumn{1}{l}{Trial 1} & \multicolumn{1}{l}{Trial 2} & \multicolumn{1}{l}{Trial 3} & \multicolumn{1}{l}{Average} & \multicolumn{1}{l}{Uncertainty} \\
+%     \end{tabular}
+% \end{table}
 
 \begin{table}[H]
     \caption{Effect of Phase Shift on Sound Level}
     \centering
-    \begin{tabular}{@{}cccc@{}} \toprule
-                                             & \multicolumn{3}{c}{Sound Level (dB) \(\pm\ 0.1\)}                     \\ \cmidrule(r){2-4}
-        Phase shift (\(\lambda\)) \(\pm\ 0\) & Trial 1                                           & Trial 2 & Trial 3 \\ \midrule
-        0.00                                 & 52.5                                              & 52.4    & 52.4    \\
-        0.05                                 & 52.8                                              & 52.7    & 52.7    \\
-        0.10                                 & 52.8                                              & 52.7    & 52.8    \\
-        0.15                                 & 52.7                                              & 52.6    & 52.6    \\
-        0.20                                 & 52.2                                              & 52.3    & 52.3    \\
-        0.25                                 & 51.7                                              & 51.7    & 51.7    \\
-        0.30                                 & 50.8                                              & 50.8    & 50.9    \\
-        0.35                                 & 49.5                                              & 49.6    & 49.6    \\
-        0.40                                 & 47.9                                              & 48.0    & 48.0    \\
-        0.45                                 & 45.8                                              & 45.8    & 45.8    \\
-        0.50                                 & 43.1                                              & 43.1    & 43.0    \\
-        0.55                                 & 40.1                                              & 39.9    & 40.1    \\
-        0.60                                 & 39.2                                              & 39.1    & 39.1    \\
-        0.65                                 & 41.2                                              & 41.3    & 41.2    \\
-        0.70                                 & 45.3                                              & 45.3    & 45.4    \\
-        0.75                                 & 47.8                                              & 47.8    & 47.7    \\
-        0.80                                 & 49.5                                              & 49.5    & 49.5    \\
-        0.85                                 & 50.8                                              & 50.8    & 50.8    \\
-        0.90                                 & 51.8                                              & 51.8    & 51.8    \\
-        0.95                                 & 52.5                                              & 52.5    & 52.5    \\
-        1.00                                 & 52.9                                              & 52.8    & 52.9    \\
+    \begin{tabular}{@{}cccccc@{}} \toprule
+                                             & \multicolumn{3}{c}{Sound Level (dB) \(\pm\ 0.1\)}                                             \\ \cmidrule(r){2-4}
+        Phase shift (\(\lambda\)) \(\pm\ 0\) & Trial 1                                           & Trial 2 & Trial 3 & Average & Uncertainty \\ \midrule
+        0.00                                 & 52.5                                              & 52.4    & 52.4    & 52.4    & 0.1         \\
+        0.05                                 & 52.8                                              & 52.7    & 52.7    & 52.7    & 0.1         \\
+        0.10                                 & 52.8                                              & 52.7    & 52.8    & 52.8    & 0.1         \\
+        0.15                                 & 52.7                                              & 52.6    & 52.6    & 52.6    & 0.1         \\
+        0.20                                 & 52.2                                              & 52.3    & 52.3    & 52.3    & 0.1         \\
+        0.25                                 & 51.7                                              & 51.7    & 51.7    & 51.7    & 0.1         \\
+        0.30                                 & 50.8                                              & 50.8    & 50.9    & 50.8    & 0.1         \\
+        0.35                                 & 49.5                                              & 49.6    & 49.6    & 49.6    & 0.1         \\
+        0.40                                 & 47.9                                              & 48.0    & 48.0    & 48.0    & 0.1         \\
+        0.45                                 & 45.8                                              & 45.8    & 45.8    & 45.8    & 0.1         \\
+        0.50                                 & 43.1                                              & 43.1    & 43.0    & 43.1    & 0.1         \\
+        0.55                                 & 40.1                                              & 39.9    & 40.1    & 40.0    & 0.1         \\
+        0.60                                 & 39.2                                              & 39.1    & 39.1    & 39.1    & 0.1         \\
+        0.65                                 & 41.2                                              & 41.3    & 41.2    & 41.2    & 0.1         \\
+        0.70                                 & 45.3                                              & 45.3    & 45.4    & 45.3    & 0.1         \\
+        0.75                                 & 47.8                                              & 47.8    & 47.7    & 47.8    & 0.1         \\
+        0.80                                 & 49.5                                              & 49.5    & 49.5    & 49.5    & 0.1         \\
+        0.85                                 & 50.8                                              & 50.8    & 50.8    & 50.8    & 0.1         \\
+        0.90                                 & 51.8                                              & 51.8    & 51.8    & 51.8    & 0.1         \\
+        0.95                                 & 52.5                                              & 52.5    & 52.5    & 52.5    & 0.1         \\
+        1.00                                 & 52.9                                              & 52.8    & 52.9    & 52.9    & 0.1
     \end{tabular}
 \end{table}
 
@@ -237,28 +227,28 @@ For the sample calculations below, \(\sigma_x\) represents the uncertainty for v
 \begin{align*}
     \intertext{\textbf{Average Sound level}}
     \intertext{The formula for the sound level, \(T_{average}\) is given by}
-    T_{average}              & = \frac{T_{1}+T_{2}+T_{3}}{3}
+    T_{average}          & = \frac{T_{1}+T_{2}+T_{3}}{3}
     \intertext{\textbf{Propogation of Uncertainty for \(T_{average}\)}}
     \intertext{The first way to propogate uncertainty is as follows}
     \sigma_{T_{average}} & = \frac{\sigma_{T_{1}} + \sigma_{T_{2}} + \sigma_{T_{3}}}{3}
     \intertext{\textit{Example} calculation of propogation of uncertainty given three sound levels at a phase shift of \(0.55\lambda\)}
-                             & = \frac{.1 + .1 + .1}{3} = .1
+                         & = \frac{.1 + .1 + .1}{3} = .1
     \intertext{\textbf{Conversion from sound level to sound intensity}}
     \intertext{The formula for equation for sound level is defined by}
-    s                        & =10\log_{10}\left(\frac{I}{I_{0}}\right)                                      \\
+    s                    & =10\log_{10}\left(\frac{I}{I_{0}}\right)                                                                                    \\
     \intertext{We solve for intensity, then use this to solve for future intensity values.}
-    I                        & =I_{0}\cdot10^{\frac{s}{10}}
+    I                    & =I_{0}\cdot10^{\frac{s}{10}}
     \intertext{\textit{Example} calculation of sound level to sound intensity for a sound level of \(50.8 dB\)}
-    I                        & =I_{0}\cdot10^{\frac{s}{10}}                                                  \\
-                             & =\left(10\cdot10^{-12}\frac{W}{m^{2}}\right)\left(10^{\frac{50.8}{10}}\right) \\
-                             & =1.2\cdot10^{-6}\frac{W}{m^{2}}
+    I                    & =I_{0}\cdot10^{\frac{s}{10}}                                                                                                \\
+                         & =\left(10\cdot10^{-12}\frac{W}{m^{2}}\right)\left(10^{\frac{50.8}{10}}\right)                                               \\
+                         & =1.2\cdot10^{-6}\frac{W}{m^{2}}
     \intertext{\textbf{Propagation of uncertainty for Intensity \((I)\)}}
     \intertext{The uncertainty for sound intensity given the equation \(I=I_{0}\cdot10^{\frac{s}{10}}\) can be derived using}
-    \sigma_{I}&=I'\cdot\sigma_{s}\\
-    &=\left(\frac{\ln\left(10\right)}{10}\left(1\cdot10^{-12}\frac{W}{m^{2}}\right)\cdot10^{\frac{s}{10}}\right)
+    \sigma_{I}           & =I'\cdot\sigma_{s}                                                                                                          \\
+                         & =\left(\frac{\ln\left(10\right)}{10}\left(1\cdot10^{-12}\frac{W}{m^{2}}\right)\cdot10^{\frac{s}{10}}\right)
     \intertext{\textit{Example} calculations for propagation of uncertainty for sound level of \(50.8\ dB\)}
-    \sigma_{I}&=\left(\frac{\ln\left(10\right)}{10}\left(1\cdot10^{-12}\frac{W}{m^{2}}\right)\cdot10^{\frac{\left(50.8\right)}{10}}\right)\\
-    &=2.8\cdot10^{-8}\frac{W}{m^{2}}
+    \sigma_{I}           & =\left(\frac{\ln\left(10\right)}{10}\left(1\cdot10^{-12}\frac{W}{m^{2}}\right)\cdot10^{\frac{\left(50.8\right)}{10}}\right) \\
+                         & =2.8\cdot10^{-8}\frac{W}{m^{2}}
 \end{align*}
 
 \section{Calculated Data Table}
@@ -267,98 +257,50 @@ For the sample calculations below, \(\sigma_x\) represents the uncertainty for v
     \centering
     % the X in tabularx expands cell to fill
     % >{} applies command to every single cell
-    \begin{tabular}{@{}cc@{}} \toprule
-        Phase shift \((\lambda\)) \(\pm\ 0\) & Average Sound Level (dB) \(\pm\ 0.5\) \\ \midrule
-        0.00                                 & 52.4                                  \\
-        0.05                                 & 52.7                                  \\
-        0.10                                 & 52.8                                  \\
-        0.15                                 & 52.6                                  \\
-        0.20                                 & 52.3                                  \\
-        0.25                                 & 51.7                                  \\
-        0.30                                 & 50.8                                  \\
-        0.35                                 & 49.6                                  \\
-        0.40                                 & 48.0                                  \\
-        0.45                                 & 45.8                                  \\
-        0.50                                 & 43.1                                  \\
-        0.55                                 & 40.0                                  \\
-        0.60                                 & 39.1                                  \\
-        0.65                                 & 41.2                                  \\
-        0.70                                 & 45.3                                  \\
-        0.75                                 & 47.8                                  \\
-        0.80                                 & 49.5                                  \\
-        0.85                                 & 50.8                                  \\
-        0.90                                 & 51.8                                  \\
-        0.95                                 & 52.5                                  \\
-        1.00                                 & 52.9                                  \\
+    \caption{The effect of phase shift on sound intensity}
+    \begin{tabular}{@{}cS[table-format=1.2e-2]S[table-format=1.1e-2]@{}} \toprule
+        {Phase shift \((\lambda) \pm 0\)} & {Sound Intensity \((\frac{W}{m^2})\)} & {Uncertainty \((\frac{W}{m^2})\)} \\ \midrule
+        0.00                              & 1.75e-07                              & 4.0e-08                           \\
+        0.05                              & 1.88e-07                              & 4.3e-08                           \\
+        0.10                              & 1.89e-07                              & 4.4e-08                           \\
+        0.15                              & 1.83e-07                              & 4.2e-08                           \\
+        0.20                              & 1.69e-07                              & 3.9e-08                           \\
+        0.25                              & 1.48e-07                              & 3.4e-08                           \\
+        0.30                              & 1.21e-07                              & 2.8e-08                           \\
+        0.35                              & 9.05e-08                              & 2.1e-08                           \\
+        0.40                              & 6.26e-08                              & 1.4e-08                           \\
+        0.45                              & 3.80e-08                              & 8.8e-09                           \\
+        0.50                              & 2.03e-08                              & 4.7e-09                           \\
+        0.55                              & 1.01e-08                              & 2.3e-09                           \\
+        0.60                              & 8.19e-09                              & 1.9e-09                           \\
+        0.65                              & 1.33e-08                              & 3.1e-09                           \\
+        0.70                              & 3.41e-08                              & 7.9e-09                           \\
+        0.75                              & 5.98e-08                              & 1.4e-08                           \\
+        0.80                              & 8.91e-08                              & 2.1e-08                           \\
+        0.85                              & 1.20e-07                              & 2.8e-08                           \\
+        0.90                              & 1.51e-07                              & 3.5e-08                           \\
+        0.95                              & 1.78e-07                              & 4.1e-08                           \\
+        1.00                              & 1.93e-07                              & 4.5e-08
     \end{tabular}
 \end{table}
-
-\section{Graph and Analysis}
-
-\begin{figure}[H]
-    \centering
-    \textbf{The effect of phase shift on the sound level of resulting wave.}\medskip\par
-    \includegraphics[scale=0.3]{res/graph.png}
-    \caption{\(y=5.93\sin\left(7.37\left(x+0.06\right)\right)+47.8\) }
-\end{figure}
-
-The line of best fit follows a curve that repetitively goes up and down, which suggests that phase shift has a sinusoidal relationship with resulting sound level. However, the correlation falls off, and points begin to deviate wildly from the line of best fit especially near the trough of the wave, where they seem to accelerate in change, and at the crests, where their rate of change seems to slow down. The error bars on many of the data points are small, yet the bars often don't touch the actual line of best fit. The crests of the grpah occur when phase shift is 0 and 1, and the lowest volume area would be when phase shift is 0.5.
-
-Recall here that decibels are exponential, meaning that they require exponentially more energy to get loud, and exponentially less energy to become more quiet. We could calculate use our average sound level to calculate the intensity of the wave.
-
-\section{Sample Calculations for Sound Intensity}
-
-% \begin{align*}
-%     \intertext{Recall the equation for getting sound level}
-%     s                 & =10\log_{10}\left(\frac{I}{I_{0}}\right) \\
-%     \intertext{We divide both sides by 10}
-%     \frac{s}{10}      & =\log_{10}\left(\frac{I}{I_{0}}\right)   \\
-%     \intertext{Then take 10 and raise to the power of both sides}
-%     10^{\frac{s}{10}} & =\frac{I}{I_{0}}                         \\
-%     \intertext{Through a little bit of algebra, we can find the sound intensity of our function}
-%     I                 & =I_{0}\cdot10^{\frac{s}{10}}
-% \end{align*}
-
-Notice that we get \(10\) to the power of something as the resulting equations. When we apply those calculations to the average sound levels we recorded previously, we get the following table
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        Phase shift \(\lambda\) \(\pm\ 0\) & Sound Intensity (\(\frac{W}{m^2}\)) \(\pm\ 0.5\) \\
-        0.00                               & \(1.75\times 10^{-7}\)                           \\
-        0.05                               & \(1.88\times 10^{-7}\)                           \\
-        0.10                               & \(1.89\times 10^{-7}\)                           \\
-        0.15                               & \(1.83\times 10^{-7}\)                           \\
-        0.20                               & \(1.69\times 10^{-7}\)                           \\
-        0.25                               & \(1.48\times 10^{-7}\)                           \\
-        0.30                               & \(1.21\times 10^{-7}\)                           \\
-        0.35                               & \(9.05\times 10^{-8}\)                           \\
-        0.40                               & \(6.26\times 10^{-8}\)                           \\
-        0.45                               & \(3.80\times 10^{-8}\)                           \\
-        0.50                               & \(2.03\times 10^{-8}\)                           \\
-        0.55                               & \(1.01\times 10^{-8}\)                           \\
-        0.60                               & \(8.19\times 10^{-9}\)                           \\
-        0.65                               & \(1.33\times 10^{-8}\)                           \\
-        0.70                               & \(3.41\times 10^{-8}\)                           \\
-        0.75                               & \(5.98\times 10^{-8}\)                           \\
-        0.80                               & \(8.91\times 10^{-8}\)                           \\
-        0.85                               & \(1.20\times 10^{-7}\)                           \\
-        0.90                               & \(1.51\times 10^{-7}\)                           \\
-        0.95                               & \(1.78\times 10^{-7}\)                           \\
-        1.00                               & \(1.93\times 10^{-7}\)                           \\
-    \end{tabular}
-\end{table}
-
-And then we can graph the sound intensity as a function of phase shift, which which results in a graph with the points being much more closely aligned with the data.
 
 \begin{figure}[H]
     \centering
     \textbf{The effect of phase shift on the sound intensity of resulting wave.}\medskip\par
-    \includegraphics[scale=0.3]{res/graph-calc.png}
-    \caption{\(y=9.31\times 10^{-8}\sin\left(6.57\left(x+0.142\right)\right)+9.95\times 10^{-8}\) }
+    \includegraphics[scale=0.35]{res/graph-calc.png}
+    \caption{\(I=9.31\cdot10^{-8}\sin\left(6.57\left(\lambda+0.14\right)\right)+9.95\cdot10^{-8}\), where \(I\) is intensity and \(\lambda\) is the phase shift.}
 \end{figure}
 
-The resulting sound intensity graph is much more sinusoidal in nature than the sound level graph, as all the averaged data points or their error bars fall on the line of best fit.
+\section{Graph and Analysis}
+
+The line of best fit follows a curve that repetitively goes up and down, which suggests that phase shift has a sinusoidal relationship with resulting sound level. The crests of the resulting wave, when sound intensity is highest, occurs when phase shift is around \(0.1\) and \(1.04\). The trough of the wave, or the phase shift which results in the lowest sound intensity would be when phase shift is around \(0.57\).
+
+Another key observation to note is the error bars of the graph, which represent uncertainty. At lower levels of sound intensity, the error uncertainty is very little. But at higher levels of sound intensity, the error bars become very large. This makes sense, because sound level is a logarithmic value.
+
+
+Earlier in the calculation section, it was shown that the uncertainty of intensity \(\sigma_{I}\) was calculated through multiplying the derivative of the function to get \(I=I_{0}10^{\frac{s}{10}}\), by the uncertainty of the measured sound level \(\sigma_{s}=0.1\). It takes exponentially more sound intensity to increase sound level, so at a certain point the recording device's accuracy of \(0.1 dBs\) wouldn't be able to represent minute changes in sound intensity at high sound levels. On the other hand, the decrease in uncertainty as sound levels decrease makes sense. Because it takes way less energy to decrease sound levels as sound level decreases, the recording device could much more easily pick up on changes to sound level even with its uncertainty of \(0.1 dBs\).
+
+
 
 \section{Observations}
 
@@ -366,29 +308,52 @@ During the experiment, I noticed that the speakers radiated out their sound wave
 
 \section{Conclusion}
 
-The results of the experiment went against my initial hypothesis that the phase shift of a one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves that are in phase meet, their crests add up, such that overlaid waves became louder, and waves off by half a \(\lambda\) became less loud, were true. However, while this change in amplitude affected \textit{sound intensity} in a fully sinusoidal relationship, the relationship with sound level was part sinusoidal, part exponential.
+The results of the experiment confirmed my initial hypothesis that the phase shift of a one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves that are in phase meet, their crests add up, such that overlaid waves became louder, and waves off by half a \(\lambda\) became less loud, were true.
+
 Greater energy does result in greater amplitude, but it is important to keep in mind that the sound level relationship isn't purely sinusoidal, because it includes logarithms and isn't uniform, so it becomes harder to increase sound level overtime with constant increases in energy.
 In relation to perfect perfect destructive interference, the data suggests that sound level will decrease exponentially as the phase shift gets closer and closer to \(0.5\lambda\). In building a real sound-cancellation device, this change in should therefore be carefully inspected, as the silence is much deeper as the wavelengths line up to be around \(\frac{1}{2}\) apart.
 
 \section{Evaluation of Strengths and Weaknesses}
-The use of a computer to directly change the change in phase between two identical waves, made it so that there was very little error in changing the independent variable.
 
-The fact that this test used a computer program to directly sample from \(\sin\) waves depending on their phase shift made changing the independent being very simple. This resulted in data being collected in a smaller time frame, which minimized the impact that the environment, in ambient noise level and temperature.
+\subsection{Strengths}
 
-Another major source of error in this experiment was the fact that it was done inside, and the sound dampening solution of four chairs and a blanket did not work out. When speakers were turned on with the blanket enclosing them, the blankets did not actually fully cancel out the sound traveling towards them like I thought they would do, but rather, they seemed to \textbf{increase} the sound level if they were placed too close to the speakers. This was perhaps the speakers were more flat than I thought they would be. Multiple waves bouncing together at different angles could've caused some measureable different in sound intensity, although the position of the blankets were kept constant.
+The fact that this test used a computer program to directly sample from \(\sin\) waves depending on their phase shift made changing the independent very simple and accurate. The use of a computer program to generate the different phase shifted waves also resulted in data being collected in a smaller time frame, which minimized the impact that the environment, in ambient noise level and temperature.
 
-Another potentially large source of the error was the angle between speakers. Initially, I thought that it wouldn't be a problem and didn't include it in my controlled variables, but after realizing that the speakers were spherical, the alignment of the speakers pointing directly to each other had to be done by eye, which was perhaps why the ideal phase shift for perfect destructive interference to occur according to literature was not exactly at \(0.5\lambda\) but rather closer to \(0.6\lambda\).
+\subsection{Weaknesses}
 
-% Another source of error was the \textbf{sensitivity} of the speaker. All speakers, due to limitations in physics and design, have a degree of error in the quality of sound that they are able to produce. In this experiment, this sensitivity was added as uncertainty to the measurement of the sound level. To decrease the amount of uncertainty in future measurements, better quality speakers could be used, which would have a higher sensitivity and therefore result in less fluctuations in sound generated.
+One large source of the error was the angle between speakers. Initially, I thought that it wouldn't be a problem and didn't include it in my controlled variables, but after realizing that the speakers were spherical, the alignment of the speakers pointing directly to each other had to be done by eye. This change in alignment could have made it so that the two waves clashed at an angle. The angled waves could hold different properties than straight waves: their effective wavelengths could change, thereby throwing off the phase shift. This error could explain why the ideal phase shift for perfect destructive interference according to literature was not exactly at \(0.5\lambda\) but rather closer to \(0.6\lambda\), as well as why the effective period was not \(1\lambda\) but rather closer to \(0.95\lambda\).
+
+Another major source of error in this experiment was the fact that it was done inside, and the sound dampening solution of four chairs and a blanket did not work out. When speakers were turned on with the blanket enclosing them, the blankets did not actually fully cancel out the sound traveling towards them like I thought they would do, but rather, they seemed to \textbf{increase} the sound level if they were placed too close to the speakers. This was perhaps the speakers were more flat than I thought they would be. Multiple waves bouncing together at different angles could've caused some measureable increase in peak and trough sound intensity.
+
+% Another source of error was the \textbf{sensitivity} of the speaker. All speakers, due to limitations in physics and design, have a degree of error in the quality of sound that they are able to produce. To decrease the amount of uncertainty in future measurements, better quality speakers could be used, which would have a higher sensitivity and therefore result in less fluctuations in sound generated.
 
 \section{Future Improvements}
 
-To improve upon this experiment, the first step would be to get a more controlled room, and use better sound dampeners which would catch the sound waves instead of letting them bounce off right back towards the microphone. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements. Using a protractor to ensure that the speakers are more aligned to each other would potentially get data values where the perfect destructive interference is closer to \(0.5\lambda\).
+To improve upon this experiment, the first step would be to gmore controlled room, and use better sound dampeners which would catch the sound waves instead of letting them bounce off right back towards the microphone. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements. Using a protractor to ensure that the speakers are more aligned to each other would potentially get data values where the perfect destructive interference is closer to \(0.5\lambda\).
 
 Lastly, testing greater wavelengths of phase shift, up to 2 or 3 \(\lambda\)s of shift would better confirm the pattern that was concluded in this experiment.
 
 \section{Works Cited}
 
 \printbibliography\
+
+\section{Appendix}
+
+\appendix
+\begin{minted}[linenos, breaklines]{rust}
+    fn next(&mut self) -> Option<(f32, f32)> {
+        // Add dt (sample rate) to time
+        self.time += self.delta_t;
+        let leading = ((self.freq * self.time * PI * 2.).sin() * self.amplitude) as f32;
+        // Recall that y = sin(b(x+c))
+        // Period is 2pi / b, so if we have 5 hz * 2pi, then period = 2pi / 10 pi = 1 / 5
+        // This means if we want a phase shift of 1/2, we need to do 1/2 / 5, which would be 1/10
+        let lagging = ((self.freq * (self.time + (self.phase_shift) / self.freq) * PI * 2.).sin()
+            * self.amplitude) as f32;
+        // the leading is outputted to the left speaker
+        // the lagging is outputted to the right speaker
+        Some((leading, lagging))
+    }
+\end{minted}
 
 \end{document}
