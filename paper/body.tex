@@ -12,28 +12,28 @@ How does the difference in phase between two waves affect the sound intensity at
 
 \section{Background}
 
-My home has always been slightly noisy, perhaps due to its positioning facing the living room, or perhaps due to my little brother's whining. I've tried blocking the door with a mattress, or blocking my own ears with some headphones, but I've never thought of blocking a sound wave with another sound wave until hearing of the concept of wave interference of light in my phyiscs class. I do have a set of speakers, connected to my computer. This lab aims to explore both the mechanics and concepts behind noise-cancellation, as well as explore at what delays between phases is noise-cancellation the most optimal.
+My home has always been slightly noisy, perhaps due to its positioning facing the living room or my little brother's whining. I've tried blocking the door with a mattress or blocking my ears with some headphones, but I've never thought of suppressing a sound wave with another sound wave until hearing the concept of wave interference of light in my physics class. I do have a set of speakers connected to my computer. This lab aims to explore both the mechanics and concepts behind noise-cancellation and explore at what delays between phases is noise-cancellation the most optimal.
 
 \subsection{Wave Interference}
 
 The waves explored in this lab both have the same frequency and wavelength, so the first thing that comes to mind between these two waves that might cause a change in sound intensity is wave interference.
-Wave interference essentially occurs, when two waves meet together. There are two types of wave interference, constructive and destructive interference. These types of interference occur situationally depending on the relative position of the two waves. When identical waves match up exactly, perfect constructive interference may occur, causing the amplitude of the resulting wave to double. Conversely, when the two waves are exactly \(\frac{1}{2}\lambda\) apart in position, they are out of phase, and perfect destructive interference occurs, which causes the effective amplitude of the resulting combined wave to be zero.\cite{openstax}
+Wave interference essentially occurs when two waves meet together. There are two types of wave interference, constructive and destructive interference. These types of interference occur situationally depending on the relative position of the two waves. When identical waves match up exactly, perfect constructive interference may occur, causing the amplitude of the resulting wave to double. Conversely, when the two waves are exactly \(\frac{1}{2}\lambda\) apart in position, they are out of phase, and perfect destructive interference occurs, which causes the effective amplitude of the resulting combined wave to be zero.\cite{openstax}
 
 \subsection{Sound Intensity}
 
-However, the amplitude changes caused by constructed and destructive interference don't necessarily translate directly to the sound level of the wave, but through background research, there is evidence that these values do have correlation.
+However, the amplitude changes caused by constructed and destructive interference don't necessarily translate directly to the sound level of the wave. Still, through background research, there is evidence that these values do correlate.
 
-From the formula for simple harmonic motion, of a particle in a wave moving up and down, we derive the equation \(E=2\pi^2dAvf^2x^2\)\cite{giancoli1995physics}. This equation effectively shows that the energy of the wave is proportional to the square of its amplitude\cite{openstax}.
+From the formula for simple harmonic motion of a particle in a wave moving up and down, we derive the equation \(E=2\pi^2dAvf^2x^2\)\cite{giancoli1995physics}. This equation effectively shows that the energy of the wave is proportional to the square of its amplitude\cite{openstax}.
 
-Furthermore, the sound intensity of a wave depends both on the energy of the wave and the area in which it travels through. It's proportional to power and inversely proportional to area as shown by the equation \(I=\frac{P}{A}\), where area is a square unit of area.\cite{openstax}. Power is defined as energy over time \(P=\frac{W}{t}\).
+Furthermore, the sound intensity of a wave depends both on the wave's energy and the area in which it travels. It's proportional to power and inversely proportional to the area as shown by the equation \(I=\frac{P}{A}\), where \(A\) is a square unit of area.\cite{openstax}. And power relates to energy because it is defined as energy over time \(P=\frac{W}{t}\).
 
-Thus, it is reasonable to deduce that constructive and destructive interference have an influence on amplitude of the wave, which affects the energy of the wave, which subsequently affects the power and therefore the sound intensity.
+Thus, it is reasonable to deduce that constructive and destructive interference influence the wave's amplitude, which affects the wave's energy, which subsequently affects the power and sound intensity.
 
 \subsection{Sound Level}
 
 In this lab, equipment measures the decibel sound level, not the sound intensity directly, so it is necessary to understand the relationship between sound level and sound intensity.
 
-While sound intensity is useful for calculating energy levels, humans don't react to sound intensity at a linear level. Instead, the relationship is more of an exponential nature. Decibels factor this in, as louder sounds need exponentially more energy in order to sound ``louder'' to humans, and conversely, quiet sounds need exponentially less energy to sound more quiet\cite{openstax}.
+While sound intensity is helpful for calculating energy levels, humans don't react to sound intensity at a linear level. Instead, the relationship is more of an exponential nature. Decibels factor this in, as louder sounds need exponentially more energy to sound ``louder'' to humans, and conversely, quiet sounds need exponentially less energy to sound more quiet\cite{openstax}.
 
 This equation can be given by
 \[
@@ -44,13 +44,13 @@ It should be noted that the average sound level of a normal conversation is arou
 
 \subsection{Speakers}
 
-Because the sound waves of this experiment will be generated by speakers, it is necessary to understand, at least at a basic level, how speakers function.\cite{speakers}
+Because speakers will generate the sound waves of this experiment, it is necessary to understand, at least at a basic level, how speakers function.\cite{speakers}
 
-For dynamic speakers, sound is generated from electric signals. When electric signals travel into a coil, a magnetic field is generated, and this causes an oscillatory motion between the cone and the coil\cites{openstax}{speakers}, resulting in motion and therefore sound waves to be produced.
+Dynamic speakers use electric signals to general sound. When electric signals travel into a coil, a magnetic field is generated, and this causes an oscillatory motion between the cone and the coil\cites{openstax}{speakers}, resulting in air molecules being moved and, therefore, sound waves to be produced.
 
 \section{Hypothesis}
 
-The difference in displacement between two in-phase waves would have a sinusoidal relationship with the sound intensity, due to constructive and destructive interference causing cyclic patterns of change in amplitude of the resulting sound.
+The difference in displacement between two in-phase waves would have a sinusoidal relationship with the sound intensity due to constructive and destructive interference causing cyclic patterns of change in amplitude of the resulting sound.
 
 \subsection{Prediction Graph}
 
@@ -64,9 +64,9 @@ The difference in displacement between two in-phase waves would have a sinusoida
 
 \subsection{Independent Variable}
 
-The independent variable in this case would be the phase-shifted distance between the two waves. Its units would be in a decimal ratio of the wavelength of the sine wave (with a frequency of 264 Hz).
+The independent variable, in this case, would be the phase-shifted distance between the two waves. Its units would be in a decimal ratio of the wavelength of the sine wave (with a frequency of 264 Hz).
 
-To change this variable, we use a computer program to generate this wave from speakers.
+We use a computer program to generate this wave from speakers to change this variable.
 
 \begin{figure}[H]
     \centering
@@ -74,14 +74,12 @@ To change this variable, we use a computer program to generate this wave from sp
     \caption{Overview of the computer program}
 \end{figure}
 
-To produce a real sound wave from the speakers, we have to input data points into the sound interface. For most regular situations, these data points either by accessing them directly (for example, in an \textit{.mp3} file). But in this case, to get a static noise, we sample the \textbf{amplitude} a sound wave, which in this case is our \(\sin\) function.
+To produce a natural sound wave from the speakers, we have to input data points into the sound interface. Most data points for sound are stored before they are accessed (for example, in an \textit{.mp3} file). But in this case, to get a static noise, we chose to sample the \textbf{amplitude} of \(\sin\) function to create the data points needed for our sound wave.
 
-The basics of how we get our points for the two waves works: is by plugging in the simple time for one function into sin, then plugging in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently.
-
-This function below is responsible is the core of the sampling code for the program\footnote[1]{the source code for the full program, as well as this paper, can be found at \href{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}}\footnote[2]{see appendix}.
+We plug in the simple time for one function into sin, then plug in the time + the offset lambda (our \textbf{independent variable}), sampling one wave and outputting it to the left speaker, and sampling the other wave and outputting it to the right speaker, concurrently. \footnote[1]{the source code for the full program, as well as this paper, can be found at \href{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}{https://github.com/SpicyRicecaker/2021.phase\_shift\_sound\_level}}\footnote[2]{see appendix}.
 
 
-In line 3, our current time is incremented by \verb+delta_t+ and its value is \(\frac{1}{48,000}(seconds)\), meaning we'll sample \(48,000\) points every second from our \(\sin\) wave.
+We increment our current time  by \verb+delta_t+ and its value is \(\frac{1}{48,000}(seconds)\), meaning we'll sample \(48,000\) points every second from our \(\sin\) wave.
 
 \begin{figure}[H]
     \centering
@@ -89,9 +87,9 @@ In line 3, our current time is incremented by \verb+delta_t+ and its value is \(
     \caption{Example of how a sine wave is sampled over a period of 1s}
 \end{figure}
 
-The reason that our \verb+delta_t+ is that value is because the specific speaker used in this experiment has a maximum sample rate of \(48,000Hz\). The effect that higher and lower sample rates has on sound waves produced by the speaker is beyond the scope of this paper.
+The reason that our \verb+delta_t+ is that value is that the specific speaker used in this experiment has a maximum sample rate of \(48,000Hz\). The effect that higher and lower sample rates have on sound waves produced by the speaker is beyond the scope of this paper.
 
-In line 4, the amplitude of the ``control wave'' (the wave in which there is no phase change is calculated) using the following function
+Finally we find the amplitude of the ``control wave'' (the wave in which there is no phase change is calculated) using the following function
 \begin{equation*}
     A\cdot\sin\left(ft\cdot2\pi\right)
 \end{equation*}, where \(f\) is the frequency of the wave (which is \(264\)), \(t\) is the current time, and \(A\) is the amplitude of the wave.
@@ -103,7 +101,7 @@ We also have \(2\pi\), because recall that the period of a \(\sin\) wave is \(\f
               & =264
 \end{align*}
 
-Finally, in line 8, we calculate the phase-shifted wave by simply adding the phase shift to the time, divided by the frequency, \(f\).
+Finally, we calculate the phase-shifted wave by simply adding the phase shift to the time, divided by the frequency, \(f\).
 
 \begin{equation*}
     A\cdot\sin\left(f\left(t+\frac{\lambda}{f}\right)\cdot2\pi\right)
@@ -111,27 +109,29 @@ Finally, in line 8, we calculate the phase-shifted wave by simply adding the pha
 
 We divide by the frequency because our phase shift is a ratio from 0 to 1, and a frequency of \(264\) means that the wave is going down 264 times a second, meaning its wavelength is not equal to 1.
 
-The uncertainty in this independent variable is practically negligible, as the increments in phase shift of \(0.05\) are directly stored in the computer program as floating point values, the inaccuracy of which is beyond the scope of this paper.
+The uncertainty in this independent variable is practically negligible, as the increments in phase shift of \(0.05\) are directly stored in the computer program as floating-point values, the inaccuracy of which is beyond the scope of this paper.
 
 \subsection{Dependent Variable}
 
-The sound level will be the dependent variable of the equation, measured in decibes. This measurement will be taken with the microphone on a used Samsung Galaxy Note9, placed in exactly the center of the distance between the two seakers, measured by ruler. The sound meter app will run for twenty seconds, and the average sound level during that time will be recorded.
+The sound intensity will be the dependent variable of the equation, measured in decibels. TO get this value, first the sound level will be measured will be taken with the microphone on a used Samsung Galaxy Note9, placed in exactly the center of the distance between the two speakers, measured by a ruler. The sound meter app will run for twenty seconds, and the average sound level during that time will be recorded.
 
-The uncertainty here will arise from the sensitivity of the microphone, and the precision of the sound meter app, as well as ambient noise and other unexpected noise from the environment, which would heavily impact the data from the experiment if it is not controlled.
+The uncertainty here will arise from the microphone's sensitivity, the precision of the sound meter app, ambient noise, and other unexpected noise from the environment, which would heavily impact the data from the experiment if it is not controlled. Then, the sound level will be converted into sound intensity using the equation \(s=10\log(\frac{I}{I_0})\).
 
 \subsection{Controlled Variable}
 
-\textbf{The distance between the two speakers} must be kept constant in every trial. As sound spreads out, it loses power exponentially, so pulling the speakers too far apart will decrease the measured sound level, and pulling the speakers too close together would increase the measured sound level. The distance between the two speakers would also directly impact the \textit{phase shift} between the two waves. For example, for a \(\sin\) wave of 264 Hz (around middle C frequency), the wavelength is only around \(1.30m\) meters, so a small shift in speaker distance in the tens of centimeters could invalidate the whole experiment. Therefore, to keep distance between the two waves equivalent, a ruler will be used to measure exactly \(1.30m\) from the base of one speaker to the other.
+\textbf{The distance between the two speakers} must be kept constant in every trial. As sound spreads out, it loses power exponentially, so pulling the speakers too far apart will decrease the measured sound level, and positioning the speakers too close together would increase the measured sound level. The distance between the two speakers would also directly impact the \textit{phase shift} between the two waves. For example, for a \(\sin\) wave of 264 Hz (around middle C frequency), the wavelength is only around \(1.30m\) meters, so a slight shift in speaker distance in the tens of centimeters could invalidate the whole experiment. Therefore, to keep the distance between the two waves equivalent, a ruler will be used to measure precisely \(1.30m\) from the base of one speaker to the other.
 
-\textbf{The position of the microphone} should be kept constant in every trial, both in the axis between speakers, and the axis perpendicular to the axis between speakers. This is because, while for perfect destructive interference, the amplitude of the wave everywhere would be zero, in other cases their will amplitudes differ at certain points. Similar to the positions of the speakers, a perpendicular distance further away from the speakers would also result in decreasing sound levels due to the fact that energy travels away in a sphere so much of it is lost to the environment further out. To mitigate position difference in the axis between speakers, the same ruler will be used to ensure that the tip of the phone is aligned exactly to \(0.65m\).
+\textbf{The position of the microphone} should be kept constant in every trial. For perfect destructive interference, the amplitude of the wave at any point between the two speakers would be zero. However, in other cases, the amplitude of the resulting wave could theoretically differ. Putting the microphone further away from the speakers would also decrease sound levels because energy travels away in a sphere, so much of it is lost to the environment further out. 
 
-\textbf{The frequency and wavelength of the two waves} The frequency of two waves should be kept the exact same at \(264Hz\) throughout all trials. In order for perfect constructive and destructive interference to occur, the two waves must be perfectly in-phase with each other, otherwise the resulting wave would be very uneven and there would be varying results everytime.
+Finally, the speakers should be positioned facing each other on the same axis. As the speakers are spherical, placing one speaker facing away would result in the waves not interacting. A ruler will be used to ensure that the tip of the phone is aligned precisely to \(0.65m\) and to mitigate position differences in the axis between speakers. 
 
-\textbf{The temperature of the room} The temperature of the room should be kept constant because temperature and movement of particles in the air affects the amount of energy lost as the wave propogates forward.
+\textbf{The frequency and wavelength of the two waves} The frequency of two waves should be kept the same at \(264Hz\) throughout all trials. For perfect constructive and destructive interference to occur, the two waves must be perfectly in-phase with each other. Otherwise, the resulting wave would be very uneven, and there would be varying results every time.
 
-\textbf{Ambient Sound Level} The ambient sound level should be kept constant because otherwise the dependent variable of sound level would be modified not just by the independent variable but also by the environment, which would invalidate the experiment. To minimize the impact that the environment will have on the experiment, four chairs will be placed surrounding the two speakers, and blankets draped over them and the top of the speakers, in an effort to decrease the effects that ambient sound levels would have on the final experiment.
+\textbf{The temperature of the room} The temperature of the room should be kept constant because the temperature and movement of particles in the air affect the amount of energy lost as the wave propagates forward.
 
-\textbf{Volume of the Speaker and Operating System} There are two places where the general output volume of the speaker can be modified, and those are in the operating system (when the press the volume up and volume down keys are pressed on the keyboard) as well as volume buttons on the external speaker. As these sound levels vary across speakers and operating systems, this paper will not provide a set constant value in which to set these two values, but the two volume controls will be tuned to an acceptable midlevel volume that falls under the danger sound levels specified by NIOSH (see safety sections below) and kept at a constant value when the experiment is carried out.
+\textbf{Ambient Sound Level} The ambient sound level should be kept constant because otherwise, the dependent variable of sound level would be modified not just by the independent variable but also by the environment, which would invalidate the experiment. Four chairs will be placed surrounding the two speakers, and blankets draped over them and the top of the speakers, to decrease ambient sound levels' effects on the final experiment.
+
+\textbf{Volume of the Speaker and Operating System} There are two places where the general output volume of the speaker can be modified. One avenue is via the operating system (when the press the volume up and volume down keys are pressed on the keyboard), and the other, volume buttons on the external speaker. As these sound levels vary across speakers and operating systems, this paper will not provide a constant value for assigning these two values. Still, the volume controls will be tuned to an acceptable midlevel volume that references that abides by the safe sound levels specified by NIOSH (see safety sections below). They will also be kept constant when the experiment is carried out.
 
 \section{Method}
 
@@ -148,14 +148,14 @@ The uncertainty here will arise from the sensitivity of the microphone, and the 
     \item Set the phase-shift of the wave to \(0\lambda\) through the computer program
     \item Run the computer program that plays a monotone sine wave at a frequency of 264 Hz through one speaker and an identical phase-shifted wave through the other speaker at the same time.
     \item After the speakers have started playing for at least 5 seconds, begin recording audio on the phone for 20 seconds.
-    \item After 20 seconds, pause the recording app on the phone, and record the average sound level displayed on the app
-    \item Repeat this recording process 3 times, and take the average of the three trials
+    \item After 20 seconds, pause the recording app on the phone and record the average sound level displayed on the app
+    \item Repeat this recording process 3 times and take the average of the three trials
     \item Repeat the entire experiment, incrementing the phase-shift defined in step 4 by \(0.05\lambda\), all the way up to and including a full phase shift of \(1\lambda\)
 \end{enumerate}
 
 \subsection{Safety}
 
-Safety precautions should be made to ensure that the speaker sound levels do not go above maximal decibel sound levels that humans are tolerant of, to preserve the health of the ear. According to the NIOSH recommendations, a human should not be exposed to a constant sound level of 85 dBAs for greater than 8 hours~\cite{cdc}. In order to make sure that sound levels never get close to 85 dBAs, the sound level when speakers are playing Aill be observed on the sound meter app at all times and the speaker volume kept at a constant
+Safety precautions should be made to ensure that the speaker sound levels do not go above maximal decibel sound levels that humans are tolerant of to preserve the ear's health. According to the NIOSH recommendations, a human should not be exposed to a constant sound level of 85 dBAs for greater than eight hours~\cite{cdc}. To make sure that sound levels never get close to 85 dBAs, the sound level when speakers are playing will be observed on the sound meter app at all times.
 
 \section{Raw Data Table}
 
@@ -293,45 +293,46 @@ For the sample calculations below, \(\sigma_x\) represents the uncertainty for v
 
 \section{Graph and Analysis}
 
-The line of best fit follows a curve that repetitively goes up and down, which suggests that phase shift has a sinusoidal relationship with resulting sound level. The crests of the resulting wave, when sound intensity is highest, occurs when phase shift is around \(0.1\) and \(1.04\). The trough of the wave, or the phase shift which results in the lowest sound intensity would be when phase shift is around \(0.57\).
+The line of best fit follows a curve that repetitively goes up and down, which suggests that phase shift has a sinusoidal relationship with the resulting sound level. This sinusoidal curve is representative of that of a regular wave. 
 
-Another key observation to note is the error bars of the graph, which represent uncertainty. At lower levels of sound intensity, the error uncertainty is very little. But at higher levels of sound intensity, the error bars become very large. This makes sense, because sound level is a logarithmic value.
+The calculated sound intensity was highest at phase shift values of \(0.1\) and \(1.04\). It was lowest at the phase shift value of \(0.57\).
 
+Another critical observation to note is the error bars of the graph, which represent uncertainty. At lower levels of sound intensity, the error uncertainty is very little, but the error bars become very large at higher levels of sound intensity. This shift in uncertainty makes sense because the sound level is a logarithmic value, so converting a logarithmic value into a scalar value such as sound intensity could incur greater uncertainty.
 
-Earlier in the calculation section, it was shown that the uncertainty of intensity \(\sigma_{I}\) was calculated through multiplying the derivative of the function to get \(I=I_{0}10^{\frac{s}{10}}\), by the uncertainty of the measured sound level \(\sigma_{s}=0.1\). It takes exponentially more sound intensity to increase sound level, so at a certain point the recording device's accuracy of \(0.1 dBs\) wouldn't be able to represent minute changes in sound intensity at high sound levels. On the other hand, the decrease in uncertainty as sound levels decrease makes sense. Because it takes way less energy to decrease sound levels as sound level decreases, the recording device could much more easily pick up on changes to sound level even with its uncertainty of \(0.1 dBs\).
+Earlier in the calculation section, it was shown that the uncertainty of intensity \(\sigma_{I}\) was calculated through multiplying the derivative of the function to get \(I=I_{0}10^{\frac{s}{10}}\), by the uncertainty of the measured sound level \(\sigma_{s}=0.1\). It takes exponentially more sound intensity to increase the sound level, so at a certain point, the recording device's accuracy of \(0.1 dBs\) wouldn't be able to represent minute changes in sound intensity at high sound levels. On the other hand, the decrease in uncertainty as sound levels decrease makes sense. Because it takes way less energy to reduce sound levels as sound level decreases, the recording device could much more easily pick up on changes to sound level even with its uncertainty of \(0.1 dBs\).
 
 
 
 \section{Observations}
 
-During the experiment, I noticed that the speakers radiated out their sound waves in a sphere outwards, and as an observer in the side, moving my ears to different areas resulted drastically different areas of loudness and quietness.
+I noticed that the speakers radiated out their sound waves in a sphere outwards during the experiment. When I moved my ears to different areas as the speakers were running, I heard drastically different levels of loudness and quietness in other regions.
 
 \section{Conclusion}
 
-The results of the experiment confirmed my initial hypothesis that the phase shift of a one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves that are in phase meet, their crests add up, such that overlaid waves became louder, and waves off by half a \(\lambda\) became less loud, were true.
+The experiment results confirmed my initial hypothesis that the phase shift of one wave affects the resulting recorded sound level in a sinusoidal relationship. The theory that when two waves in phase meet, their crests add up, such that overlaid waves become louder, and waves off by half a \(\lambda\) became less noisy was true.
 
-Greater energy does result in greater amplitude, but it is important to keep in mind that the sound level relationship isn't purely sinusoidal, because it includes logarithms and isn't uniform, so it becomes harder to increase sound level overtime with constant increases in energy.
-In relation to perfect perfect destructive interference, the data suggests that sound level will decrease exponentially as the phase shift gets closer and closer to \(0.5\lambda\). In building a real sound-cancellation device, this change in should therefore be carefully inspected, as the silence is much deeper as the wavelengths line up to be around \(\frac{1}{2}\) apart.
+Greater energy does result in greater amplitude, but it is essential to remember that the sound level relationship isn't purely sinusoidal because it includes logarithms and isn't uniform. Hence, it becomes harder to increase sound levels over time with constant increases in energy.
+Concerning perfect destructive interference, the data suggests that sound level will decrease exponentially as the phase shift gets closer and closer to \(0.5\lambda\). In building an actual sound-cancellation device, this change should therefore be carefully inspected, as the silence is much deeper as the wavelengths line up to be around \(\frac{1}{2}\) apart.
 
 \section{Evaluation of Strengths and Weaknesses}
 
 \subsection{Strengths}
 
-The fact that this test used a computer program to directly sample from \(\sin\) waves depending on their phase shift made changing the independent very simple and accurate. The use of a computer program to generate the different phase shifted waves also resulted in data being collected in a smaller time frame, which minimized the impact that the environment, in ambient noise level and temperature.
+Using a computer program to generate the different phase-shifted waves resulted in data being collected in a smaller time frame, which minimized the impact of the environment in ambient noise level and temperature. Changing the value of the independent variable was accurate as well as simple. 
 
 \subsection{Weaknesses}
 
-One large source of the error was the angle between speakers. Initially, I thought that it wouldn't be a problem and didn't include it in my controlled variables, but after realizing that the speakers were spherical, the alignment of the speakers pointing directly to each other had to be done by eye. This change in alignment could have made it so that the two waves clashed at an angle. The angled waves could hold different properties than straight waves: their effective wavelengths could change, thereby throwing off the phase shift. This error could explain why the ideal phase shift for perfect destructive interference according to literature was not exactly at \(0.5\lambda\) but rather closer to \(0.6\lambda\), as well as why the effective period was not \(1\lambda\) but rather closer to \(0.95\lambda\).
+One significant source of the error was the angle between speakers. Initially, I thought it wouldn't be a problem and didn't include it in my controlled variables. However, after realizing that the speakers were spherical, the alignment of the speakers pointing directly to each other had to be done by eye. This change in alignment could have made it so that the two waves clashed at an angle. The angled waves could hold different properties than straight waves: their effective wavelengths could change, thereby throwing off the phase shift. This error could explain why the ideal phase shift for perfect destructive interference according to literature was not precisely at \(0.5\lambda\) but rather closer to \(0.6\lambda\), as well as why the effective period was not \(1\lambda\) but somewhat closer to \(0.95\lambda\).
 
-Another major source of error in this experiment was the fact that it was done inside, and the sound dampening solution of four chairs and a blanket did not work out. When speakers were turned on with the blanket enclosing them, the blankets did not actually fully cancel out the sound traveling towards them like I thought they would do, but rather, they seemed to \textbf{increase} the sound level if they were placed too close to the speakers. This was perhaps the speakers were more flat than I thought they would be. Multiple waves bouncing together at different angles could've caused some measureable increase in peak and trough sound intensity.
+Another primary source of error in this experiment was that it was done inside, and the sound dampening solution of four chairs and a blanket did not work out. When speakers were turned on with the blanket enclosing them, the blankets did not entirely cancel out the sound traveling towards them like I thought they would do, but rather, they seemed to \textbf{increase} the sound level if they were placed too close to the speakers. Perhaps the speakers were flatter than I thought they would be. Multiple waves bouncing together at different angles could've caused some measurable increase in peak and trough sound intensity.
 
-% Another source of error was the \textbf{sensitivity} of the speaker. All speakers, due to limitations in physics and design, have a degree of error in the quality of sound that they are able to produce. To decrease the amount of uncertainty in future measurements, better quality speakers could be used, which would have a higher sensitivity and therefore result in less fluctuations in sound generated.
+% Another source of error was the \textbf{sensitivity} of the speaker. Due to limitations in physics and design, all speakers have a degree of error in the quality of sound that they can produce. Better quality speakers could be used, which would have a higher sensitivity and therefore result in fewer fluctuations in sound generated.
 
 \section{Future Improvements}
 
-To improve upon this experiment, the first step would be to gmore controlled room, and use better sound dampeners which would catch the sound waves instead of letting them bounce off right back towards the microphone. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements. Using a protractor to ensure that the speakers are more aligned to each other would potentially get data values where the perfect destructive interference is closer to \(0.5\lambda\).
+To improve this experiment, the first step would be to conduct the experiment in a more controlled room and use better sound dampeners that would catch the sound waves instead of letting them bounce off right back towards the microphone. Improving the specificity of the microphone of the phone to include the thousandths of decibels would result in more accurate measurements. Using a protractor to ensure that the speakers are more aligned to each other would potentially get data values where the perfect destructive interference is closer to \(0.5\lambda\).
 
-Lastly, testing greater wavelengths of phase shift, up to 2 or 3 \(\lambda\)s of shift would better confirm the pattern that was concluded in this experiment.
+Lastly, testing greater wavelengths of phase shift, up to 2 or 3 \(\lambda\)s of phase shift, would better confirm the pattern that was concluded in this experiment.
 
 \section{Works Cited}
 
